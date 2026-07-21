@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>リスニングテスト勉強用サイト (スマホ確実対応版)</title>
+<style>
+  :root {
+    --primary: #2563EB;
+    --bg: #F8FAFC;
+    --sidebar: #1E293B;
+    --text: #334155;
+    --border: #E2E8F0;
+    --ja-color: #64748B;
+  }
+  body {
+    margin: 0;
+    font-family: 'Helvetica Neue', 'Hiragino Sans', 'Meiryo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  
+  /* ラジオボタンは画面から隠す */
+  input[type="radio"] {
+    display: none;
+  }
+
+  .app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  #sidebar {
+    width: 320px;
+    background: var(--sidebar);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  #sidebar h2 {
+    padding: 20px;
+    margin: 0;
+    font-size: 18px;
+    border-bottom: 1px solid #334155;
+    text-align: center;
+    background: #0F172A;
+  }
+  .nav-container {
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* ボタンの代わりのラベル */
+  .nav-btn {
+    display: block;
+    width: 100%;
+    padding: 16px 20px;
+    background: none;
+    border: none;
+    color: #CBD5E1;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    border-bottom: 1px solid #334155;
+    transition: 0.2s;
+    line-height: 1.4;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn:hover {
+    background: #334155;
+    color: white;
+  }
+
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #header {
+    padding: 15px 30px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .header-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #1E293B;
+  }
+  .toggle-group {
+    display: flex;
+    gap: 8px;
+    background: #F1F5F9;
+    padding: 5px;
+    border-radius: 8px;
+  }
+  .toggle-btn {
+    display: inline-block;
+    padding: 8px 18px;
+    color: #64748B;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 14px;
+    font-weight: bold;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .toggle-btn:hover {
+    color: #1E293B;
+  }
+
+  #content {
+    padding: 40px;
+    overflow-y: auto;
+    flex: 1;
+    scroll-behavior: smooth;
+  }
+  
+  .section {
+    display: none;
+    max-width: 850px;
+    margin: 0 auto;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-title {
+    font-size: 26px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #1E293B;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--border);
+  }
+  .text-container {
+    background: white;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  }
+  .sentence {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .sentence:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .en {
+    font-size: 17px;
+    line-height: 1.6;
+    color: #0F172A;
+    font-weight: 500;
+  }
+  .ja {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ja-color);
+    margin-top: 10px;
+  }
+
+  /* ======== CSSだけで動かすためのトリック (表示モード) ======== */
+  #view-en:checked ~ .app-container .ja { display: none !important; }
+  #view-ja:checked ~ .app-container .en { display: none !important; }
+  
+  #view-en:checked ~ .app-container label[for="view-en"],
+  #view-ja:checked ~ .app-container label[for="view-ja"],
+  #view-bi:checked ~ .app-container label[for="view-bi"] {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  /* ======== CSSだけで動かすためのトリック (セクション切替) ======== */
+  #sec-radio-0:checked ~ .app-container #sec-0 { display: block; }
+  #sec-radio-0:checked ~ .app-container label[for="sec-radio-0"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-1:checked ~ .app-container #sec-1 { display: block; }
+  #sec-radio-1:checked ~ .app-container label[for="sec-radio-1"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-2:checked ~ .app-container #sec-2 { display: block; }
+  #sec-radio-2:checked ~ .app-container label[for="sec-radio-2"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-3:checked ~ .app-container #sec-3 { display: block; }
+  #sec-radio-3:checked ~ .app-container label[for="sec-radio-3"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-4:checked ~ .app-container #sec-4 { display: block; }
+  #sec-radio-4:checked ~ .app-container label[for="sec-radio-4"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-5:checked ~ .app-container #sec-5 { display: block; }
+  #sec-radio-5:checked ~ .app-container label[for="sec-radio-5"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-6:checked ~ .app-container #sec-6 { display: block; }
+  #sec-radio-6:checked ~ .app-container label[for="sec-radio-6"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-7:checked ~ .app-container #sec-7 { display: block; }
+  #sec-radio-7:checked ~ .app-container label[for="sec-radio-7"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-8:checked ~ .app-container #sec-8 { display: block; }
+  #sec-radio-8:checked ~ .app-container label[for="sec-radio-8"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-9:checked ~ .app-container #sec-9 { display: block; }
+  #sec-radio-9:checked ~ .app-container label[for="sec-radio-9"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-10:checked ~ .app-container #sec-10 { display: block; }
+  #sec-radio-10:checked ~ .app-container label[for="sec-radio-10"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+  #sec-radio-11:checked ~ .app-container #sec-11 { display: block; }
+  #sec-radio-11:checked ~ .app-container label[for="sec-radio-11"] {
+    background: #334155; color: white; border-left: 5px solid var(--primary); padding-left: 15px; font-weight: bold;
+  }
+
+  @media (max-width: 768px) {
+    .app-container { flex-direction: column; }
+    #sidebar { width: 100%; max-height: 250px; }
+    #header { flex-direction: column; text-align: center; padding: 15px; }
+    .toggle-group { width: 100%; justify-content: center; flex-wrap: wrap; }
+    #content { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+  <!-- 表示モード用ラジオボタン -->
+  <input type="radio" name="view-mode" id="view-en">
+  <input type="radio" name="view-mode" id="view-ja">
+  <input type="radio" name="view-mode" id="view-bi" checked>
+
+  <!-- セクション用ラジオボタン -->
+  <input type="radio" name="section" id="sec-radio-0" checked>
+  <input type="radio" name="section" id="sec-radio-1">
+  <input type="radio" name="section" id="sec-radio-2">
+  <input type="radio" name="section" id="sec-radio-3">
+  <input type="radio" name="section" id="sec-radio-4">
+  <input type="radio" name="section" id="sec-radio-5">
+  <input type="radio" name="section" id="sec-radio-6">
+  <input type="radio" name="section" id="sec-radio-7">
+  <input type="radio" name="section" id="sec-radio-8">
+  <input type="radio" name="section" id="sec-radio-9">
+  <input type="radio" name="section" id="sec-radio-10">
+  <input type="radio" name="section" id="sec-radio-11">
+
+  <div class="app-container">
+    <div id="sidebar">
+      <h2>Listening Comprehension</h2>
+      <div class="nav-container">
+        <label for="sec-radio-0" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">1. From a small pin to a house</label>
+        <label for="sec-radio-1" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">2. Aromatic asphalt</label>
+        <label for="sec-radio-2" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">3. The oldest astronaut</label>
+        <label for="sec-radio-3" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">4. Miracle encounter</label>
+        <label for="sec-radio-4" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">5. The house built on bowling balls</label>
+        <label for="sec-radio-5" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">6. Sleeping bus tour</label>
+        <label for="sec-radio-6" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">7. A man searching for himself</label>
+        <label for="sec-radio-7" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">8. Missing art found next door</label>
+        <label for="sec-radio-8" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">9. Smart fabric</label>
+        <label for="sec-radio-9" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">10. The last flashback</label>
+        <label for="sec-radio-10" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">11. Book borrowed long, long ago</label>
+        <label for="sec-radio-11" class="nav-btn" onclick="document.getElementById('content').scrollTop=0;">12. A boy's emergency call</label>
+      </div>
+    </div>
+    
+    <div id="main">
+      <div id="header">
+        <p class="header-title">表示モード切替 (Display Mode)</p>
+        <div class="toggle-group">
+          <label for="view-en" class="toggle-btn">English (英語のみ)</label>
+          <label for="view-ja" class="toggle-btn">Japanese (日本語のみ)</label>
+          <label for="view-bi" class="toggle-btn">Bilingual (対訳)</label>
+        </div>
+      </div>
+      
+      <div id="content">
+        <div class="section" id="sec-0">
+          <h2 class="section-title">1. From a small pin to a house</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">A TikToker started off with one tiny item and ended up with her dream house.</div>
+              <div class="ja">あるTikTokerが1つの小さなアイテムから始めて、最終的に夢の家を手に入れました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">It all began with Demi Skipper's Trade Me Project account on TikTok, which eventually got 5 million followers.</div>
+              <div class="ja">それは、Demi SkipperさんのTikTok上の「Trade Me Project」アカウントから始まり、最終的に500万人のフォロワーを獲得しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Skipper's goal was to keep trading items until she got a house.</div>
+              <div class="ja">Skipperさんの目標は、家を手に入れるまでアイテムを交換し続けることでした。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">To start the project, Skipper put one bobby pin on Craigslist for trading.</div>
+              <div class="ja">プロジェクトを始めるため、SkipperさんはCraigslistに1つのヘアピンを出品して交換を求めました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">From there, the bobby pin got traded for items such as a diamond necklace, a car, tractors, a restaurant gift card, and a $40,000 trailer.</div>
+              <div class="ja">そこから、ヘアピンはダイヤモンドのネックレス、車、トラクター、レストランのギフトカード、4万ドルのトレーラーなどのアイテムと交換されました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Then a man following Skipper's account offered her a house for the trailer.</div>
+              <div class="ja">そして、Skipperさんのアカウントをフォローしていたある男性が、トレーラーと家を交換することを申し出ました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">A year and a half after starting with one tiny hair accessory, Skipper had the keys to her dream house.</div>
+              <div class="ja">1つの小さなヘアアクセサリーから始めて1年半後、Skipperさんは夢の家の鍵を手にしました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Although many people doubted that she could reach her goal, Skipper was glad she didn't give up.</div>
+              <div class="ja">多くの人が彼女が目標を達成できるか疑っていましたが、Skipperさんは諦めなかったことを喜んでいます。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Skipper doesn't plan to stop here though. She wants to start the trading process all over again so she can donate the next house she gets to someone in need.</div>
+              <div class="ja">しかし、Skipperさんはここで止めるつもりはありません。彼女は、次に手に入れる家を困っている人に寄付できるように、この交換プロセスを最初からやり直したいと考えています。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-1">
+          <h2 class="section-title">2. Aromatic asphalt</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">Anyone who has been near a newly built road knows how strong and unpleasant the smell of asphalt can be.</div>
+              <div class="ja">新しく建設された道路の近くにいたことがある人なら、アスファルトの匂いがどれほど強くて不快なものか知っているでしょう。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Now, two Polish companies have developed asphalt that smells like flowers.</div>
+              <div class="ja">現在、2つのポーランドの企業が、花の香りがするアスファルトを開発しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The companies hope the new product will improve working conditions for those involved in road construction.</div>
+              <div class="ja">これらの企業は、この新製品が道路建設に携わる人々の労働環境を改善することを期待しています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The new asphalt contains substances that neutralize the bad smell associated with conventional asphalt.</div>
+              <div class="ja">新しいアスファルトには、従来のアスファルトに伴う悪臭を中和する物質が含まれています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The pleasant floral scent comes from a mixture of natural and synthetic essential oils.</div>
+              <div class="ja">その心地よい花の香りは、天然および合成のエッセンシャルオイルの混合物から作られています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Tests have proven that the new product meets Polish road standards and is also better for the environment.</div>
+              <div class="ja">テストにより、この新製品がポーランドの道路基準を満たしており、環境にも良いことが証明されています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">It is expected that the asphalt will be on the market in the near future.</div>
+              <div class="ja">このアスファルトは近い将来、市場に出回ると予想されています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">A spokesperson for the project said the two companies created the product out of concern for the environment and employees' working conditions.</div>
+              <div class="ja">プロジェクトの広報担当者は、2つの企業が環境と従業員の労働環境を配慮してこの製品を作成したと述べました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">This complies with the greening trend in the construction industry, which seeks to adopt more environmentally friendly, ecological products and practices.</div>
+              <div class="ja">これは、建設業界において環境に優しいエコな製品や実践を採用しようとするグリーン化のトレンドに合致しています。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-2">
+          <h2 class="section-title">3. The oldest astronaut</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">At 82, Wally Funk has become the oldest person to go to space.</div>
+              <div class="ja">82歳にして、Wally Funkさんは宇宙へ行った最年長の人物となりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">She was chosen by Jeff Bezos of Amazon fame to board a rocket developed by Blue Origin, an aerospace and space flight company owned by Bezos.</div>
+              <div class="ja">彼女はAmazonで有名なJeff Bezos氏によって選ばれ、Bezos氏が所有する航空宇宙企業であるBlue Origin社が開発したロケットに搭乗しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Funk has been involved in aviation all her life.</div>
+              <div class="ja">Funkさんは生涯を通じて航空に関わってきました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">She took her first flying lesson at 9, and volunteered for a pioneering "Women in Space Program" in 1961.</div>
+              <div class="ja">彼女は9歳で初めての飛行レッスンを受け、1961年には先駆的な「女性の宇宙プログラム」にボランティアとして参加しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Her dream of going to space ended suddenly when the program was canceled.</div>
+              <div class="ja">彼女の宇宙へ行くという夢は、プログラムがキャンセルされた時に突然終わりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">That didn't stop her from becoming an air safety investigator and a flight instructor, which was extremely rare for women of Funk's generation.</div>
+              <div class="ja">それでも、彼女が航空安全調査官や飛行インストラクターになることを止めることはなく、それはFunkさんの世代の女性にとっては極めて稀なことでした。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">And now, she has fulfilled her lifelong dream of going to space.</div>
+              <div class="ja">そして今、彼女は宇宙へ行くという生涯の夢を果たしました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Traveling at almost 3 times the speed of sound, the Blue Origin rocket took four passengers, including Funk, 100 kilometers above the Earth.</div>
+              <div class="ja">音速のほぼ3倍の速度で移動し、Blue OriginのロケットはFunkさんを含む4人の乗客を地球から100キロメートル上空まで連れて行きました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">After a flight of about 10 minutes, the rocket returned to the Earth.</div>
+              <div class="ja">約10分間の飛行の後、ロケットは地球に戻りました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Funk was overjoyed to have made the trip, and descended the rocket to find champagne and a cheering crowd waiting for her.</div>
+              <div class="ja">Funkさんはこの旅行ができたことを大喜びし、ロケットから降りるとシャンパンと彼女を待っていた歓喜の群衆を見つけました。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-3">
+          <h2 class="section-title">4. Miracle encounter</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">Randy Waits found a brother he never knew he had.</div>
+              <div class="ja">Randy Waitsさんは、自分に兄弟がいることを全く知りませんでした。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He was watching TV at home when he saw a tourist named Edward Waits being interviewed on the news.</div>
+              <div class="ja">彼は家でテレビを見ていた時、ニュースでEdward Waitsという名前の観光客がインタビューされているのを見ました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Randy became curious because they had the same last name.</div>
+              <div class="ja">Randyさんは、同じ名字であったため興味を持ちました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He showed a photo he had taken of the TV screen to his kids.</div>
+              <div class="ja">彼はテレビ画面を撮った写真を子供たちに見せました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">They thought the man looked a lot like their father.</div>
+              <div class="ja">子供たちは、その男性が自分たちの父親にそっくりだと思いました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">An online search began for the man named Edward Waits.</div>
+              <div class="ja">Edward Waitsという名前の男性のオンライン検索が始まりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The search proved the two men were brothers.</div>
+              <div class="ja">検索の結果、その2人の男性は兄弟であることが判明しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Randy was shocked because he grew up without a father, who had left his mother when Randy was a baby.</div>
+              <div class="ja">Randyさんは、自分が赤ん坊の頃に母親を置いていった父親なしで育ったため、ショックを受けました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Edward Waits was also shocked when he found out he had an older brother.</div>
+              <div class="ja">Edward Waitsさんも、自分に年上の兄弟がいることを知ってショックを受けました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">After talking on the phone, the two met.</div>
+              <div class="ja">電話で話した後、2人は会うことになりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">They compared their very different childhoods.</div>
+              <div class="ja">彼らは全く異なる子供時代を比較しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Randy grew up poor with a single mother.</div>
+              <div class="ja">Randyさんはシングルマザーのもとで貧しく育ちました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Edward had a loving father who was his hero.</div>
+              <div class="ja">Edwardさんには愛情深い父親がいて、彼のヒーローでした。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">However, they also found out they liked many of the same things.</div>
+              <div class="ja">しかし、彼らは自分たちが多くの同じものを好きであることも発見しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Randy said he blamed no one.</div>
+              <div class="ja">Randyさんは誰も責めていないと言いました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He just wanted to be good to his new brother, and knew that Edward felt the same.</div>
+              <div class="ja">彼はただ新しい兄弟に優しくしたいと思っており、Edwardさんも同じように感じていることを知っていました。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-4">
+          <h2 class="section-title">5. The house built on bowling balls</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">What would you do if you found 160 bowling balls under your house?</div>
+              <div class="ja">もし自分の家の床下に160個のボーリングの球を見つけたら、どうしますか？</div>
+            </div>
+            <div class="sentence">
+              <div class="en">That's what happened to a man in Michigan.</div>
+              <div class="ja">それはミシガン州のある男性に起こったことです。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">David Olson and his family bought a house in 2019.</div>
+              <div class="ja">David Olsonさんとその家族は2019年に家を購入しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">When Olson began removing some dangerous stairs attached to the house, he found that they were built on old bowling balls.</div>
+              <div class="ja">Olsonさんが家に付属している危険な階段の一部を撤去し始めた時、彼はそれらが古いボーリングの球の上に建てられていることに気づきました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He eventually found 160 bowling balls under the stairs and patio.</div>
+              <div class="ja">最終的に彼は階段とパティオの下に160個のボーリングの球を見つけました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He thinks there are even more in the ground.</div>
+              <div class="ja">彼は、土の中にはさらに多くの球があると考えています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">After the discovery, Olson became worried that the house could have been a dumping ground for hazardous materials.</div>
+              <div class="ja">発見後、Olsonさんはその家が有害な物質の不法投棄場所だったのではないかと心配になりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He contacted the manufacturer of the bowling balls.</div>
+              <div class="ja">彼はボーリングの球のメーカーに連絡しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">They said the balls probably came from a factory the company had nearby in the 1950s.</div>
+              <div class="ja">彼らは、その球がおそらく1950年代に近くにあった会社の工場から来たものだろうと言いました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He also thinks the original owner of the house somehow got the bowling balls and used them to fill spaces around the house.</div>
+              <div class="ja">また、家の元の所有者がどうにかしてボーリングの球を手に入れ、家の周りのスペースを埋めるために使用したのだろうとも考えられています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Meanwhile, Olson has gained international attention through a Facebook group he's been using to document what he has been doing, and has even set up a funding campaign to help pay for the removal costs.</div>
+              <div class="ja">一方、Olsonさんは自分がしていることを記録するために使っているFacebookグループを通じて国際的な注目を集め、撤去費用を支払うための資金調達キャンペーンまで立ち上げました。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-5">
+          <h2 class="section-title">6. Sleeping bus tour</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">Hong Kong has a unique bus tour that helps people fall asleep.</div>
+              <div class="ja">香港には、人々が眠りにつくのを助けるユニークなバスツアーがあります。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Passengers who take the tour can enjoy a 76-kilometer, 5-hour tour around the territory while sleeping.</div>
+              <div class="ja">ツアーに参加する乗客は、眠りながら香港領土を巡る76キロメートル、5時間のツアーを楽しむことができます。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The organizer of the tour got the idea from a friend's social media post.</div>
+              <div class="ja">このツアーの主催者は、友人のソーシャルメディアの投稿からアイデアを得ました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The friend mentioned in the post that he couldn't sleep at night because of stress from work.</div>
+              <div class="ja">その友人は、仕事のストレスのせいで夜眠れないと投稿で言及していました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">However, he was able to sleep well when traveling on a bus.</div>
+              <div class="ja">しかし、バスで移動している時はよく眠れたのです。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">This led to the creation of a bus tour for sleeping instead of sightseeing.</div>
+              <div class="ja">これが、観光の代わりに睡眠のためのバスツアーを作るきっかけとなりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">For a ticket costing from $13 to $51, passengers can choose seats on either the upper or lower deck of the bus.</div>
+              <div class="ja">13ドルから51ドルのチケット代で、乗客はバスの2階または1階の座席を選ぶことができます。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Passengers even get a goodie bag with an eye mask and earplugs to ensure better sleep.</div>
+              <div class="ja">乗客は、より良い睡眠を確保するためにアイマスクと耳栓の入ったグッズバッグまでもらうことができます。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Tickets were completely sold out for the first sleeping bus tour.</div>
+              <div class="ja">最初の睡眠バスツアーのチケットは完全に売り切れました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Some passengers brought blankets, travel pillows, and slippers to help them sleep better.</div>
+              <div class="ja">一部の乗客は、よりよく眠るために毛布、旅行用枕、スリッパを持参しました。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-6">
+          <h2 class="section-title">7. A man searching for himself</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">What sounds like something from a comedy sketch actually happened in real life.</div>
+              <div class="ja">コメディーのコントのような出来事が、実際に現実の生活で起こりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">A man in Turkey joined a search party looking for none other than himself.</div>
+              <div class="ja">トルコのある男性が、他ならぬ自分自身を探す捜索隊に参加しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Beyhan Mutlu, 51, was reported missing by his wife when he failed to return home.</div>
+              <div class="ja">51歳のBeyhan Mutluさんは、家に帰らなかったため妻から行方不明者として報告されました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Mutlu and a friend had gone drinking in a forest in a town in northwest Turkey.</div>
+              <div class="ja">Mutluさんと友人は、トルコ北西部の町にある森へ飲みに行っていました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The friend told Mutlu's wife that Mutlu was drunk and that they parted in the forest.</div>
+              <div class="ja">友人はMutluさんの妻に、Mutluさんは酔っ払っており、森の中で別れたと伝えました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">After walking away from his friend, Mutlu fell asleep in a house in the forest.</div>
+              <div class="ja">友人から離れて歩いた後、Mutluさんは森の中の家で眠ってしまいました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">When he woke up the next morning, he noticed there was a search party looking for a missing person.</div>
+              <div class="ja">翌朝彼が目を覚ますと、行方不明者を探す捜索隊がいることに気づきました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He decided to help out by joining the party.</div>
+              <div class="ja">彼はその捜索隊に参加して手伝うことにしました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">About half an hour later, Mutlu learned the party was looking for him when members started calling out his name.</div>
+              <div class="ja">約30分後、メンバーが彼の名前を呼び始めた時、Mutluさんは捜索隊が自分を探していることを知りました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Mutlu was shocked and told the search party that he was Beyhan Mutlu.</div>
+              <div class="ja">Mutluさんはショックを受け、捜索隊に自分がBeyhan Mutluであると伝えました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">No one believed him until Mutlu's friend saw and identified him.</div>
+              <div class="ja">Mutluさんの友人が彼を見て本人確認をするまで、誰も彼を信じませんでした。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-7">
+          <h2 class="section-title">8. Missing art found next door</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">A painting whose whereabouts were unknown for decades was found by chance by a museum visitor.</div>
+              <div class="ja">何十年も行方が分からなかった絵画が、美術館の訪問者によって偶然発見されました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The visitor was at an exhibition of a series of paintings by the famous Black American artist Jacob Lawrence.</div>
+              <div class="ja">その訪問者は、有名な黒人アメリカ人アーティストであるJacob Lawrenceによる一連の絵画の展覧会にいました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Five works were missing from his original series of 30 paintings.</div>
+              <div class="ja">彼のオリジナルの30枚の絵画シリーズのうち、5作品が欠けていました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The visitor thought a painting she saw in her neighbor's apartment could be one of them.</div>
+              <div class="ja">訪問者は、隣人のアパートで見た絵画がその1つかもしれないと考えました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The visitor went home and advised her neighbors to get in touch with the museum.</div>
+              <div class="ja">訪問者は家に帰り、隣人に美術館と連絡を取るように勧めました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The painting belonged to an elderly couple who bought it at a charity art auction in 1960.</div>
+              <div class="ja">その絵画は、1960年にチャリティーアートオークションで購入した老夫婦の所有物でした。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The couple gladly agreed to loan out the painting.</div>
+              <div class="ja">夫婦は喜んで絵画を貸し出すことに同意しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">After making sure the painting was authentic and in good condition, the museum added it to the exhibition.</div>
+              <div class="ja">絵画が本物であり、状態が良いことを確認した後、美術館はそれを展覧会に追加しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The museum's curators had hoped the missing works would somehow be found.</div>
+              <div class="ja">美術館の学芸員たちは、行方不明の作品がどうにかして見つかることを望んでいました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The museum director said that a discovery of such importance was rare in modern art.</div>
+              <div class="ja">美術館の館長は、このような重要な発見は現代アートにおいて稀であると述べました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He added, it was thrilling that a local visitor was responsible for the discovery.</div>
+              <div class="ja">彼は、地元の訪問者がその発見の立役者であったことはワクワクすることだと付け加えました。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-8">
+          <h2 class="section-title">9. Smart fabric</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">Can you imagine a shirt that can adjust its own temperature, or pants that can sense changes in your movement and health, and warn you if something is wrong?</div>
+              <div class="ja">自分自身の温度を調節できるシャツや、動きや健康状態の変化を感知し、何か異常があれば警告してくれるズボンを想像できますか？</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Textile researchers think such a fabric may eventually become widely available.</div>
+              <div class="ja">繊維研究者たちは、そのような布地が最終的に広く利用可能になるかもしれないと考えています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Nextiles, a Brooklyn-based startup backed by the National Science Foundation, just launched a patented fabric with smart features.</div>
+              <div class="ja">全米科学財団の支援を受けているブルックリンを拠点とするスタートアップ、Nextilesは、スマート機能を備えた特許取得済みの布地を発表したばかりです。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The fabric has built-in technology to record biometric data.</div>
+              <div class="ja">その布地には生体認証データを記録するためのテクノロジーが組み込まれています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">For starters, the company has tried the technology in sportswear for athletes.</div>
+              <div class="ja">まず手始めに、同社はその技術をアスリート向けのスポーツウェアで試しました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The sportswear allows athletes to keep track of their movements, going beyond what current wristbands and smartwatches can do.</div>
+              <div class="ja">そのスポーツウェアにより、アスリートは現在のリストバンドやスマートウォッチができることを超えて、自分の動きを記録・追跡することができます。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The company now only offers custom-made garments with its smart technology.</div>
+              <div class="ja">同社は現在、スマートテクノロジーを備えたオーダーメイドの衣服のみを提供しています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">However, it wants to mass-market its fabric in the future.</div>
+              <div class="ja">しかし、将来的には自社の布地をマスマーケット向けに販売したいと考えています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The fabric would be made into regular, washable garments and would be able to monitor a person's breathing and heart rate.</div>
+              <div class="ja">その布地は通常の洗濯可能な衣服に作られ、人の呼吸や心拍数をモニタリングできるようになるでしょう。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Researchers aren't sure whether there will be enough demand for this kind of fabric, since smartphones and smartwatches can already do so much.</div>
+              <div class="ja">スマートフォンやスマートウォッチがすでに多くのことができるため、研究者たちはこの種の布地に十分な需要があるかどうかは確信していません。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">But they think this outlook could change as the smart fabric continues to evolve.</div>
+              <div class="ja">しかし、スマートファブリックが進化し続けるにつれて、この見通しは変わる可能性があると彼らは考えています。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-9">
+          <h2 class="section-title">10. The last flashback</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">New data collected by a team of scientists show that your life may actually flash before your eyes as you're dying.</div>
+              <div class="ja">科学者のチームによって収集された新しいデータは、死の間際に自分の人生が実際に目の前にフラッシュバックする可能性があることを示しています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The team was monitoring the brain waves of an epileptic patient when the patient had a fatal heart attack.</div>
+              <div class="ja">チームはてんかん患者の脳波をモニタリングしていましたが、その時患者は致命的な心臓発作を起こしました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">This led to the accidental discovery of what goes on in the brain during the process of dying.</div>
+              <div class="ja">これが、死の過程において脳で何が起こっているのかという偶然の発見につながりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">According to the data, the brain concentrates, dreams, and recalls memories 30 seconds before and after blood stops reaching the brain.</div>
+              <div class="ja">データによると、血液が脳に届かなくなる前後の30秒間、脳は集中し、夢を見て、記憶を呼び起こします。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The data did not reveal the content of the memories, but the scientific team thinks the brain was replaying life experiences before death.</div>
+              <div class="ja">データは記憶の内容までは明らかにしませんでしたが、科学チームは脳が死の前に人生の経験をリプレイしていたと考えています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">It is difficult to draw conclusions from just one case.</div>
+              <div class="ja">たった一つのケースから結論を導き出すのは困難です。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">However, the data was very similar to that collected from a study done on healthy rats.</div>
+              <div class="ja">しかし、そのデータは健康なラットで行われた研究から収集されたものと非常に似ていました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">It also showed high brain wave activity in rats during the dying process.</div>
+              <div class="ja">それはまた、死の過程においてラットの高い脳波活動を示していました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Scientists who gathered the human brain wave data are excited about the similar results from the two studies.</div>
+              <div class="ja">人間の脳波データを収集した科学者たちは、2つの研究からの類似した結果に興奮しています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">This may prove that there is a scientific explanation for what happens during near-death experiences.</div>
+              <div class="ja">これは、臨死体験中に起こることに対して科学的な説明があることを証明するかもしれません。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-10">
+          <h2 class="section-title">11. Book borrowed long, long ago</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">An overdue library book has been returned.</div>
+              <div class="ja">返却期限を過ぎていた図書館の本が返却されました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Why is it making news?</div>
+              <div class="ja">なぜそれがニュースになっているのでしょうか？</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The book was printed in 1704, and checked out over 300 years ago.</div>
+              <div class="ja">その本は1704年に印刷され、300年以上前に貸し出されたものでした。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">It all began when a package arrived at 800-year-old Sheffield Cathedral in England.</div>
+              <div class="ja">それはすべて、イギリスにある築800年のシェフィールド大聖堂に小包が到着したことから始まりました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The package contained a book with a note.</div>
+              <div class="ja">その小包にはメモ付きの本が入っていました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The note said, "The book's owner had recently passed away, and had asked for the book to be returned."</div>
+              <div class="ja">メモには、「この本の所有者は最近亡くなり、本を返却するように頼んでいた」と書かれていました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Sheffield Cathedral used to be a church with a famous library.</div>
+              <div class="ja">シェフィールド大聖堂はかつて有名な図書館のある教会でした。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">But the library is believed to have been closed sometime during the Georgian period.</div>
+              <div class="ja">しかし、その図書館はジョージア王朝時代のある時期に閉鎖されたと考えられています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">There was an entry inside the book proving that it belonged to the church library.</div>
+              <div class="ja">本の中には、それが教会の図書館に属していることを証明する記入がありました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">This meant someone borrowed the book from the library about 300 years ago and did not return it.</div>
+              <div class="ja">これは、約300年前に誰かが図書館からその本を借りて返却しなかったことを意味していました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The vice dean of the cathedral said he was overjoyed to have the book back.</div>
+              <div class="ja">大聖堂の副学部長は、本が戻ってきて大喜びしていると述べました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">He joked that he is trying to figure out what the late fee might be for the overdue book.</div>
+              <div class="ja">彼は、返却期限を過ぎた本の延滞料金がいくらになるか計算しようとしていると冗談を言いました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The cathedral plans to put the book, 'The Faith and Practice of a Church of England Man', on display.</div>
+              <div class="ja">大聖堂は、「The Faith and Practice of a Church of England Man（イングランド国教会員の信仰と実践）」というその本を展示する予定です。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section" id="sec-11">
+          <h2 class="section-title">12. A boy's emergency call</h2>
+          <div class="text-container">
+            <div class="sentence">
+              <div class="en">A four-year-old boy in New Zealand made an emergency call to the police.</div>
+              <div class="ja">ニュージーランドの4歳の男の子が警察に緊急電話をかけました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">What exactly was the emergency?</div>
+              <div class="ja">正確には何の緊急事態だったのでしょうか？</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The boy wanted someone to come over and see his toys.</div>
+              <div class="ja">その男の子は、誰かに自分の家に来ておもちゃを見てほしかったのです。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The call was made while the boy's mother was sick in bed and he was helping her.</div>
+              <div class="ja">その電話は、男の子の母親が病気でベッドに寝ていて、彼が彼女を手伝っている間にかけられました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The police usually discourage children from calling their emergency number without a real emergency.</div>
+              <div class="ja">警察は通常、本当の緊急事態がない限り、子供たちが緊急番号に電話をかけることを思いとどまらせています。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">They couldn't resist responding this time, however, because it was too cute.</div>
+              <div class="ja">しかし、今回は可愛すぎたため、対応せずにはいられませんでした。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">After making sure there was no real emergency, a free police officer was sent to the boy's home.</div>
+              <div class="ja">本当の緊急事態ではないことを確認した後、手の空いている警察官が男の子の家に派遣されました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The officer then checked out the toys, which he mentioned were quite cool, and had a talk with the boy about using the police emergency number properly.</div>
+              <div class="ja">その後、警察官はおもちゃを確認し（彼はそれがとてもクールだったと言及しました）、警察の緊急番号を正しく使用することについて男の子と話し合いました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">The boy even got to sit on the hood of a patrol car with its lights on.</div>
+              <div class="ja">男の子は、ライトが点灯しているパトカーのボンネットに座ることさえできました。</div>
+            </div>
+            <div class="sentence">
+              <div class="en">Police then passed on the cuteness by posting the photo and the recording of the boy's call on social media.</div>
+              <div class="ja">その後、警察はその写真と男の子の通話の録音をソーシャルメディアに投稿することで、その可愛さを共有しました。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
