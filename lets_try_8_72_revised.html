@@ -105,7 +105,7 @@
       // Page 77
       { id: "77-1A", page: 77, num: "1-A", type: "basic", jp: "昨晩夜ふかししたので、眠い。", en: "I am sleepy because I stayed up late last night.", hint: "", blankTarget: "I am sleepy because I stayed up late last night", targetWord: "because" },
       { id: "77-1B", page: 77, num: "1-B", type: "practice", jp: "今朝朝食を食べなかったので、お腹が空いた。", en: "I am hungry because I didn't eat breakfast this morning.", hint: "hungry", blankTarget: "I am hungry", targetWord: "hungry" },
-      { id: "77-1C", page: 77, num: "1-C", type: "practice", jp: "昨晩食べ過ぎたので、気持ちが悪い。", en: "I feel sick because I ate too much last night.", hint: "sick", blankTarget: "I feel sick", targetWord: "sick" },
+      { id: "77-1C", page: 77, num: "1-C", type: "practice", jp: "昨晩食べ過ぎたので、気持ちが悪い。", en: "I'm sick because I ate too much last night.", hint: "sick", blankTarget: "I'm sick", targetWord: "sick" },
       { id: "77-2A", page: 77, num: "2-A", type: "basic", jp: "昨日はとても暑かったので、外に出たくなかった。", en: "Since it was very hot yesterday, I didn't want to go out.", hint: "", blankTarget: "Since it was very hot yesterday, I didn't want to go out", targetWord: "Since" },
       { id: "77-2B", page: 77, num: "2-B", type: "practice", jp: "昨日はとても寒かったので、外に出たくなかった。", en: "Since it was very cold yesterday, I didn't want to go out.", hint: "cold", blankTarget: "Since it was very cold yesterday", targetWord: "cold" },
       { id: "77-2C", page: 77, num: "2-C", type: "practice", jp: "昨日は雨がひどかったので、外に出たくなかった。", en: "Since it was very rainy yesterday, I didn't want to go out.", hint: "rainy", blankTarget: "Since it was very rainy yesterday", targetWord: "rainy" },
@@ -171,6 +171,24 @@
         .trim();
     };
 
+    function getWrongCharacterIndexes(input, expected) {
+      const a = input || "", b = expected || "";
+      const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+      for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+      for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+      for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+        dp[i][j] = a[i - 1].toLowerCase() === b[j - 1].toLowerCase() ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+      const wrong = new Set(); let i = a.length, j = b.length;
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && a[i - 1].toLowerCase() === b[j - 1].toLowerCase() && dp[i][j] === dp[i - 1][j - 1]) { i--; j--; continue; }
+        if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) { wrong.add(i - 1); i--; j--; continue; }
+        if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) { wrong.add(i - 1); i--; continue; }
+        j--;
+      }
+      return wrong;
+    }
+
     // Helper: Speech synthesis
     const speakText = (text, rate = 1.0) => {
       if ('speechSynthesis' in window) {
@@ -188,7 +206,9 @@
     };
 
     // Small original dog illustrations; the palette and ears vary by question.
-    function DogSticker({ seed = 0, size = 76 }) {
+    function DogSticker({ seed = 0, size = 76, question = null }) {
+      const subject = question ? `${question.jp} ${question.en}` : "";
+      const prop = /snow|ski|スキー|スノボ/i.test(subject) ? "🎿" : /robot|ロボット/i.test(subject) ? "🤖" : /plane|airplane|飛行機/i.test(subject) ? "✈️" : /train|電車/i.test(subject) ? "🚆" : /computer|online|パソコン|オンライン/i.test(subject) ? "💻" : /exam|試験/i.test(subject) ? "📚" : /movie|映画/i.test(subject) ? "🎬" : /game|ゲーム/i.test(subject) ? "🎮" : /match|試合/i.test(subject) ? "⚽" : /lottery|宝くじ/i.test(subject) ? "🎟️" : /jog|ジョギング/i.test(subject) ? "🏃" : /magazine|雑誌|book|宿題|assignment/i.test(subject) ? "📖" : /karaoke|カラオケ|voice|声/i.test(subject) ? "🎤" : /shoes|靴/i.test(subject) ? "👟" : /health|健康|sick|気持ちが悪/i.test(subject) ? "🌿" : /cat|猫/i.test(subject) ? "🐱" : /rain|雨/i.test(subject) ? "🌧️" : /hot|暑/i.test(subject) ? "☀️" : /cold|寒/i.test(subject) ? "🧣" : /time|時間|birthday|誕生日/i.test(subject) ? "⏰" : /street|traffic|intersection|道|信号|交差点/i.test(subject) ? "🚦" : /business|job|仕事/i.test(subject) ? "🧹" : /eat|food|食|beef|chicken/i.test(subject) ? "🍖" : /sleep|寝/i.test(subject) ? "💤" : "🐾";
       const palettes = [
         ['#f6c77a','#8a542e','#fff1d6'], ['#e7edf6','#52627a','#ffffff'], ['#d98b55','#71391f','#ffe0ae'],
         ['#bd8b68','#5b3c2a','#f5dfc4'], ['#f4e6c8','#b8844d','#fff8e9'], ['#9b6b4d','#563521','#e9c3a0'],
@@ -207,7 +227,13 @@
         {seed % 3 === 0 && <path d="M67 27 Q76 19 82 27 Q76 35 67 27Z" fill="#fb7185"/>}
         {seed % 3 === 1 && <circle cx="50" cy="22" r="4" fill="#60a5fa"/>}
         {seed % 3 === 2 && <path d="M43 81 Q50 75 57 81 L55 86 L45 86Z" fill="#fbbf24"/>}
+        {question && <><circle cx="82" cy="20" r="14" fill="white" stroke="#cbd5e1" strokeWidth="1.5"/><text x="82" y="26" textAnchor="middle" fontSize="17">{prop}</text></>}
       </svg>;
+    }
+
+    function DogForQuestion({ q, size = 68 }) {
+      const seed = q.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+      return <DogSticker seed={seed} size={size} question={q} />;
     }
 
     function useEnterToNext(enabled, next) {
@@ -581,6 +607,7 @@
       const [userAnswers, setUserAnswers] = useState({});
       const [feedback, setFeedback] = useState({});
       const [showHint, setShowHint] = useState(false);
+      const [showErrorMarkers, setShowErrorMarkers] = useState({});
       const [isRandomOrder, setIsRandomOrder] = useState(false);
       const [shuffledQuestions, setShuffledQuestions] = useState([]);
       const answerInputRef = useRef(null);
@@ -723,14 +750,12 @@
 
             <div className="space-y-4 mb-6">
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">日本語訳</div>
-              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
 
               {fillType === "oneWord" && (
                 <div className="p-4 bg-slate-900 border border-slate-700/80 rounded-xl">
                   <div className="text-xs font-bold text-indigo-400 mb-1">虫食い英文:</div>
-                  <p className="text-lg sm:text-xl font-bold font-mono text-slate-200">
-                    {maskedSentence}
-                  </p>
+                  <div className="flex items-center justify-between gap-3"><p className="text-lg sm:text-xl font-bold font-mono text-slate-200">{maskedSentence}</p><DogForQuestion q={q} size={58} /></div>
                 </div>
               )}
 
@@ -814,6 +839,16 @@
                   </button>
                 </div>
 
+                {!result && <div className="mb-4">
+                  <button type="button" onClick={() => setShowErrorMarkers(prev => ({ ...prev, [answerKey]: !prev[answerKey] }))} className="px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm shadow"><i className="fa-solid fa-highlighter mr-2"></i>{showErrorMarkers[answerKey] ? "マーカーを消す" : "間違いにマーカー"}</button>
+                  {showErrorMarkers[answerKey] && (() => {
+                    const typed = userAnswers[answerKey] || "";
+                    const candidates = fillType === "oneWord" ? [targetWord] : [q.blankTarget, q.en].filter(Boolean);
+                    const expected = candidates.sort((a, b) => Math.abs(a.length - typed.length) - Math.abs(b.length - typed.length))[0] || q.en;
+                    const wrongIndexes = getWrongCharacterIndexes(typed, expected);
+                    return <div className="mt-3 p-3 bg-slate-950 border border-amber-400/60 rounded-lg"><div className="text-xs text-amber-200 font-bold mb-1">あなたの入力（赤い部分を確認）</div><p className="font-mono text-lg break-words">{typed.split("").map((char, index) => wrongIndexes.has(index) ? <mark key={index} className="bg-rose-500 text-white rounded-sm px-px">{char}</mark> : <span key={index}>{char}</span>)}</p><div className="text-xs text-slate-400 mt-2">正解: <span className="text-emerald-300 font-mono">{expected}</span></div></div>;
+                  })()}
+                </div>}
                 <div className="space-y-2 text-sm sm:text-base">
                   {fillType === "oneWord" && (
                     <div>
@@ -823,7 +858,7 @@
                   )}
                   <div>
                     <span className="text-slate-400 text-xs font-bold block">全文英文:</span>
-                    <p className="font-bold text-white font-mono text-base sm:text-lg">{q.en}</p>
+                    <div className="flex items-center justify-between gap-3"><p className="font-bold text-white font-mono text-base sm:text-lg">{q.en}</p><DogForQuestion q={q} size={58} /></div>
                   </div>
                 </div>
               </div>
@@ -982,7 +1017,7 @@
 
             <div className="mb-6">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">日本語訳</span>
-              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
               {q.hint && (
                 <div className="mt-2 text-xs font-mono text-amber-300">
                   指定語句: [{q.hint}]
@@ -1076,7 +1111,7 @@
                 </div>
                 <div className="mt-2">
                   <span className="text-slate-400 text-xs font-bold block">正解英文:</span>
-                  <p className="font-mono font-bold text-white text-lg">{q.en}</p>
+                  <div className="flex items-center justify-between gap-3"><p className="font-mono font-bold text-white text-lg">{q.en}</p><DogForQuestion q={q} size={58} /></div>
                 </div>
               </div>
             )}
@@ -1223,7 +1258,7 @@
 
             <div className="mb-6 space-y-3">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">日本語訳</span>
-              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
 
               <div className="p-4 bg-slate-900/90 border border-teal-500/30 rounded-xl">
                 <p className="text-sm sm:text-base text-slate-200 font-medium">
@@ -1395,7 +1430,7 @@
           </div>
           <div className="mb-6">
             <div className="text-xs font-bold text-slate-400 mb-2">日本語訳</div>
-            <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-white leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+            <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-white leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
           </div>
           <div className="rounded-2xl bg-slate-950 border border-indigo-400/50 p-5 sm:p-7 mb-6">
             <div className="text-xs font-bold text-rose-300 mb-3">英文（誤りは1か所）</div>
@@ -1414,7 +1449,7 @@
           </div>
           {isChecked && <div className={`mt-6 p-5 rounded-xl border ${selectedChoice === correctIndex ? 'bg-emerald-950/70 border-emerald-500 text-emerald-100' : 'bg-rose-950/70 border-rose-500 text-rose-100'}`}>
             <div className="font-bold text-lg mb-2">{selectedChoice === correctIndex ? '正解です！' : `不正解。正解は ${labels[correctIndex]} です。`}</div>
-            <div className="text-sm text-slate-200">正しい英文</div><p className="font-mono text-white text-base sm:text-lg mt-1">{q.en}</p>
+            <div className="text-sm text-slate-200">正しい英文</div><div className="flex items-center justify-between gap-3"><p className="font-mono text-white text-base sm:text-lg mt-1">{q.en}</p><DogForQuestion q={q} size={58} /></div>
             <button onClick={() => speakText(q.en)} className="mt-3 px-4 py-2 bg-slate-800 rounded-lg text-sm font-bold"><i className="fa-solid fa-volume-high mr-2 text-indigo-300"></i>音声</button>
           </div>}
           <div className="flex items-center justify-between mt-7 pt-5 border-t border-slate-600">
@@ -1615,7 +1650,7 @@
 
             <div className="space-y-4 mb-6">
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">日本語訳</div>
-              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
               {q.hint && (
                 <div className="text-xs font-mono text-amber-300">
                   指定語句: [{q.hint}]
@@ -1671,7 +1706,7 @@
                 </div>
                 <div>
                   <span className="text-slate-400 text-xs font-bold block">正解英文:</span>
-                  <p className="font-mono font-bold text-white text-lg">{q.en}</p>
+                  <div className="flex items-center justify-between gap-3"><p className="font-mono font-bold text-white text-lg">{q.en}</p><DogForQuestion q={q} size={58} /></div>
                 </div>
               </div>
             )}
@@ -1785,8 +1820,8 @@
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3"><div className="text-slate-200 font-bold text-base">{q.jp}</div><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} size={54} /></div>
-                  <div className="text-indigo-300 font-mono font-bold text-sm sm:text-base">{q.en}</div>
+                  <div className="flex items-center gap-3"><div className="text-slate-200 font-bold text-base">{q.jp}</div><DogForQuestion q={q} size={54} /></div>
+                  <div className="flex items-center justify-between gap-3"><div className="text-indigo-300 font-mono font-bold text-sm sm:text-base">{q.en}</div><DogForQuestion q={q} size={48} /></div>
                 </div>
 
                 <div className="flex items-center gap-2 self-end md:self-center shrink-0">
@@ -1952,7 +1987,7 @@
                   </div>
 
                   <div className="my-auto text-center py-6">
-                    <div className="flex items-center justify-center gap-4"><h3 className="text-xl sm:text-3xl font-extrabold text-white leading-relaxed">{q.jp}</h3><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} size={92} /></div>
+                    <div className="flex items-center justify-center gap-4"><h3 className="text-xl sm:text-3xl font-extrabold text-white leading-relaxed">{q.jp}</h3><DogForQuestion q={q} size={92} /></div>
                     {q.hint && (
                       <p className="mt-3 text-xs sm:text-sm font-mono text-amber-300">
                         ヒント: [{q.hint}]
@@ -1978,9 +2013,7 @@
                   </div>
 
                   <div className="my-auto text-center py-6">
-                    <p className="text-xl sm:text-3xl font-mono font-extrabold text-emerald-300 leading-relaxed">
-                      {q.en}
-                    </p>
+                    <div className="flex items-center justify-center gap-4"><p className="text-xl sm:text-3xl font-mono font-extrabold text-emerald-300 leading-relaxed">{q.en}</p><DogForQuestion q={q} size={88} /></div>
                   </div>
 
                   <div className="text-center text-xs text-slate-500 font-bold">
