@@ -21,12 +21,28 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
-      background-color: #0f172a;
+      background: radial-gradient(ellipse at top, #243451 0%, #111827 55%, #0b1220 100%);
       color: #f8fafc;
+      line-height: 1.65;
     }
     .card-flip {
       perspective: 1000px;
     }
+    @keyframes cerberusDash {
+      0% { transform: translate(-100%, 66vh) scaleX(1); }
+      12% { transform: translate(5vw, 49vh) scaleX(1); }
+      25% { transform: translate(72vw, 12vh) scaleX(1); }
+      37% { transform: translate(18vw, 7vh) scaleX(-1); }
+      50% { transform: translate(calc(96vw - min(340px, 72vw)), 42vh) scaleX(-1); }
+      62% { transform: translate(43vw, 76vh) scaleX(1); }
+      75% { transform: translate(4vw, 35vh) scaleX(1); }
+      88% { transform: translate(66vw, 18vh) scaleX(-1); }
+      100% { transform: translate(4vw, 66vh) scaleX(1); }
+    }
+    .cerberus-runner { position: fixed; z-index: 45; left: 0; top: 0; width: min(340px, 72vw); pointer-events: none; animation: cerberusDash 20s linear infinite; filter: drop-shadow(0 10px 18px rgba(0,0,0,.45)); }
+    .cerberus-runner svg { animation: dogGallop .38s ease-in-out infinite alternate; }
+    @keyframes dogGallop { from { margin-top: 0; } to { margin-top: -14px; } }
+    @media (prefers-reduced-motion: reduce) { .cerberus-runner, .cerberus-runner svg { animation: none; left: 1rem; top: 60vh; transform: none; } }
     .card-inner {
       transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       transform-style: preserve-3d;
@@ -62,7 +78,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
     // ----------------------------------------------------
     // Full Dataset: 72 Questions (Pages: 70, 71, 76, 77, 82, 83, 88, 89)
@@ -70,7 +86,7 @@
     const QUESTIONS_DATA = [
       // Page 70
       { id: "70-1A", page: 70, num: "1-A", type: "basic", jp: "15足す30は45です。", en: "When we add 15 and 30, we get 45.", hint: "", blankTarget: "When we add 15 and 30, we get 45", targetWord: "add" },
-      { id: "70-1B", page: 70, num: "1-B", type: "practice", jp: "5足す10は15です。", en: "When we add 5 and 10, we get 15.", hint: "fifteen", blankTarget: "fifteen", targetWord: "fifteen" },
+      { id: "70-1B", page: 70, num: "1-B", type: "practice", jp: "5足す10は15です。", en: "When we add 5 and 10, we get 15.", hint: "fifteen", blankTarget: "15", targetWord: "15" },
       { id: "70-1C", page: 70, num: "1-C", type: "practice", jp: "15かける30は450です。", en: "When we multiply 15 and 30 together, we get 450.", hint: "multiply / together", blankTarget: "multiply 15 and 30 together", targetWord: "multiply" },
       { id: "70-2A", page: 70, num: "2-A", type: "basic", jp: "飛行機と電車、どちらがいいですか。", en: "Which do you prefer, planes or trains?", hint: "", blankTarget: "Which do you prefer, planes or trains?", targetWord: "prefer" },
       { id: "70-2B", page: 70, num: "2-B", type: "practice", jp: "ビーフとチキン、どちらがいいですか。", en: "Which do you prefer, beef or chicken?", hint: "beef / chicken", blankTarget: "beef or chicken", targetWord: "beef" },
@@ -104,7 +120,7 @@
       // Page 77
       { id: "77-1A", page: 77, num: "1-A", type: "basic", jp: "昨晩夜ふかししたので、眠い。", en: "I am sleepy because I stayed up late last night.", hint: "", blankTarget: "I am sleepy because I stayed up late last night", targetWord: "because" },
       { id: "77-1B", page: 77, num: "1-B", type: "practice", jp: "今朝朝食を食べなかったので、お腹が空いた。", en: "I am hungry because I didn't eat breakfast this morning.", hint: "hungry", blankTarget: "I am hungry", targetWord: "hungry" },
-      { id: "77-1C", page: 77, num: "1-C", type: "practice", jp: "昨晩食べ過ぎたので、気持ちが悪い。", en: "I feel sick because I ate too much last night.", hint: "sick", blankTarget: "I feel sick", targetWord: "sick" },
+      { id: "77-1C", page: 77, num: "1-C", type: "practice", jp: "昨晩食べ過ぎたので、気持ちが悪い。", en: "I'm sick because I ate too much last night.", hint: "sick", blankTarget: "I'm sick", targetWord: "sick" },
       { id: "77-2A", page: 77, num: "2-A", type: "basic", jp: "昨日はとても暑かったので、外に出たくなかった。", en: "Since it was very hot yesterday, I didn't want to go out.", hint: "", blankTarget: "Since it was very hot yesterday, I didn't want to go out", targetWord: "Since" },
       { id: "77-2B", page: 77, num: "2-B", type: "practice", jp: "昨日はとても寒かったので、外に出たくなかった。", en: "Since it was very cold yesterday, I didn't want to go out.", hint: "cold", blankTarget: "Since it was very cold yesterday", targetWord: "cold" },
       { id: "77-2C", page: 77, num: "2-C", type: "practice", jp: "昨日は雨がひどかったので、外に出たくなかった。", en: "Since it was very rainy yesterday, I didn't want to go out.", hint: "rainy", blankTarget: "Since it was very rainy yesterday", targetWord: "rainy" },
@@ -157,6 +173,86 @@
       { id: "89-3C", page: 89, num: "3-C", type: "practice", jp: "私たちが試合に勝つ可能性は低い。", en: "There is a low possibility of our winning the match.", hint: "low", blankTarget: "low possibility of our winning the match", targetWord: "low" }
     ];
 
+    const JP_STUDY_ITEMS = [
+      // Unit 11: blue Japanese notes visible in the supplied page image.
+      { id:"u11-b1", page:70, prompt:"等位接続詞は文法上の＿＿＿をつなぐ。", answer:"等しいもの", choices:["等しいもの","最小単位","主節","副詞節"] },
+      { id:"u11-b2", page:70, prompt:"単語同士をつなぐ場合の青字メモ：＿＿＿", answer:"最小単位", choices:["最小単位","等しいもの","形容詞","副詞節"] },
+      { id:"u11-b3", page:71, prompt:"単語の品詞を示す青字メモは＿＿＿", answer:"形容詞", choices:["形容詞","名詞","主語","補語"] },
+
+      // Unit 12: blue Japanese grammar notes and blue Japanese sentence portions.
+      { id:"u12-b1", page:76, prompt:"従属接続詞は、＿＿＿（メインとなる文）と副詞節を結びつける。", answer:"主節", choices:["主節","従属","副詞節","最小単位"] },
+      { id:"u12-b2", page:76, prompt:"主節に対して＿＿＿する副詞節。", answer:"従属", choices:["従属","主節","最小単位","等しいもの"] },
+      { id:"u12-b3", page:76, prompt:"従属接続詞が主節と結びつける青字のかたまりは＿＿＿。", answer:"副詞節", choices:["副詞節","主節","形容詞","最小単位"] },
+      { id:"u12-b4", page:76, prompt:"「時」の意味を持つ青字メモ：＿＿＿", answer:"〜の時", choices:["〜の時","〜の間","〜ごとに","〜前に"] },
+      { id:"u12-b5", page:76, prompt:"青字の意味メモ：＿＿＿", answer:"〜の間", choices:["〜の間","〜の時","〜後","〜から"] },
+      { id:"u12-b6", page:76, prompt:"青字の意味メモ：＿＿＿", answer:"〜ごとに", choices:["〜ごとに","〜までには","〜の時","〜前に"] },
+      { id:"u12-b7", page:76, prompt:"青字の意味メモ：＿＿＿", answer:"〜前に", choices:["〜前に","〜後","〜までずっと","〜の間"] },
+      { id:"u12-b8", page:76, prompt:"青字の意味メモ：＿＿＿", answer:"〜後", choices:["〜後","〜前に","〜の時","〜から"] },
+      { id:"u12-b9", page:76, prompt:"青字の意味メモ：＿＿＿", answer:"〜までずっと", choices:["〜までずっと","〜までには","〜ごとに","〜の間"] },
+      { id:"u12-b10", page:76, prompt:"青字の意味メモ：＿＿＿", answer:"〜までには", choices:["〜までには","〜までずっと","〜前に","〜後"] },
+      { id:"u12-b11", page:76, prompt:"青字の意味メモ：＿＿＿", answer:"〜から", choices:["〜から","〜ごとに","〜の時","〜までには"] },
+      { id:"u12-b12", page:77, prompt:"青字の意味メモ：＿＿＿", answer:"今や〜なので", choices:["今や〜なので","〜の時","〜前に","〜の間"] },
+      { id:"u12-b13", page:77, prompt:"青字メモ：から（いつ）＿＿＿", answer:"過去形必須", choices:["過去形必須","今や〜なので","〜までずっと","最小単位"] },
+      { id:"u12-b14", page:76, prompt:"彼が来たら、＿＿＿", answer:"真実を話します", choices:["真実を話します","より賢くなる","夕食を食べましょう","寝ましょう"] },
+      { id:"u12-b15", page:76, prompt:"バスを待っている間、＿＿＿", answer:"彼女は本を読んだ", choices:["彼女は本を読んだ","真実を話します","ここにいよう","早く寝た"] },
+      { id:"u12-b16", page:76, prompt:"年を取るごとに、＿＿＿", answer:"より賢くなる", choices:["より賢くなる","彼女は本を読んだ","パーティーは終わっていた","家に帰ることを決めた"] },
+      { id:"u12-b17", page:76, prompt:"彼らが来る前に、＿＿＿", answer:"夕食を食べましょう", choices:["夕食を食べましょう","寝ましょう","ここにいよう","真実を話します"] },
+      { id:"u12-b18", page:76, prompt:"宿題が終わったら、＿＿＿", answer:"寝ましょう", choices:["寝ましょう","夕食を食べましょう","より賢くなる","彼女は本を読んだ"] },
+      { id:"u12-b19", page:76, prompt:"雨が止むまで、＿＿＿", answer:"ここにいよう", choices:["ここにいよう","寝ましょう","真実を話します","パーティーは終わっていた"] },
+      { id:"u12-b20", page:76, prompt:"彼女がつくまでには、＿＿＿", answer:"パーティーは終わっていた", choices:["パーティーは終わっていた","ここにいよう","彼女は本を読んだ","夕食を食べましょう"] },
+      { id:"u12-b21", page:76, prompt:"彼が別の国に引っ越してから、＿＿＿", answer:"彼に会っていない", choices:["彼に会っていない","真実を話します","より賢くなる","早く寝た"] },
+      { id:"u12-b22", page:77, prompt:"疲れていたので、＿＿＿", answer:"早く寝た", choices:["早く寝た","家に帰ることを決めた","手伝ってくれる？","ピクニックは延期にしよう"] },
+      { id:"u12-b23", page:77, prompt:"あなたは忙しくないので、＿＿＿", answer:"手伝ってくれる？", choices:["手伝ってくれる？","早く寝た","寝ましょう","ここにいよう"] },
+      { id:"u12-b24", page:77, prompt:"暗くなってきたので、＿＿＿", answer:"家に帰ることを決めた", choices:["家に帰ることを決めた","早く寝た","手伝ってくれる？","真実を話します"] },
+      { id:"u12-b25", page:77, prompt:"今や雨が降っているので、＿＿＿", answer:"ピクニックは延期にしよう", choices:["ピクニックは延期にしよう","家に帰ることを決めた","早く寝た","夕食を食べましょう"] },
+
+      // Unit 13: blue Japanese notes and Japanese sentence portions.
+      { id:"u13-b1", page:82, prompt:"名詞節と副詞節の違いは、＿＿＿ということ。", answer:"文系の一部になっているかいなか", choices:["文系の一部になっているかいなか","等しいものをつなぐ","最小単位","〜までには"] },
+      { id:"u13-b2", page:82, prompt:"名詞節の場合は必ず＿＿＿、目的語、補語のどれになっているか確認する。", answer:"主語", choices:["主語","従属","副詞節","形容詞"] },
+      { id:"u13-b3", page:82, prompt:"名詞節の場合は主語、＿＿＿、補語のどれになっているか確認する。", answer:"目的語", choices:["目的語","主節","形容詞","最小単位"] },
+      { id:"u13-b4", page:82, prompt:"名詞節の場合は主語、目的語、＿＿＿のどれになっているか確認する。", answer:"補語", choices:["補語","副詞節","従属","形容詞"] },
+      { id:"u13-b5", page:82, prompt:"同格の節は、＿＿＿を具体的に説明する役割を果たす。", answer:"前にある名詞", choices:["前にある名詞","主節","より賢くなる","最小単位"] },
+      { id:"u13-b6", page:82, prompt:"同格の意味は「＿＿＿」。", answer:"〜という", choices:["〜という","〜の時","〜前に","今や〜なので"] },
+      { id:"u13-b7", page:82, prompt:"青字の構文メモ：＿＿＿", answer:"同格", choices:["同格","主節","副詞節","形容詞"] },
+      { id:"u13-b8", page:83, prompt:"間接疑問文は、疑問文が＿＿＿文の一部に組み込まれたもの。", answer:"平叙", choices:["平叙","主節","従属","形容詞"] },
+      { id:"u13-b9", page:82, prompt:"彼が試験に合格したのは＿＿＿", answer:"いいニュースだ", choices:["いいニュースだ","問題は時間がないことだ","手伝えなくてごめん","いくらか知りたい"] },
+      { id:"u13-b10", page:82, prompt:"問題は＿＿＿", answer:"時間がないことだ", choices:["時間がないことだ","いいニュースだ","手伝えなくてごめん","どこに住んでいるか知らない"] },
+      { id:"u13-b11", page:82, prompt:"彼は一緒に旅行するべきというアイデアを＿＿＿", answer:"拒絶した", choices:["拒絶した","信念を抱いている","驚いた","教えてください"] },
+      { id:"u13-b12", page:82, prompt:"彼女は努力は成功につながると＿＿＿", answer:"信念を抱いている", choices:["信念を抱いている","拒絶した","驚いた","ごめん"] },
+      { id:"u13-b13", page:82, prompt:"私たちはコンサートが中止になって＿＿＿", answer:"驚いた", choices:["驚いた","拒絶した","いいニュースだ","知りたい"] },
+      { id:"u13-b14", page:82, prompt:"＿＿＿", answer:"手伝えなくてごめん", choices:["手伝えなくてごめん","時間がないことだ","拒絶した","より賢くなる"] },
+      { id:"u13-b15", page:83, prompt:"＿＿＿", answer:"どこに住んでいるか知らない", choices:["どこに住んでいるか知らない","いくらか知りたい","彼に会っていない","手伝ってくれる？"] },
+      { id:"u13-b16", page:83, prompt:"＿＿＿", answer:"ばすがいつ到着するか教えてください", choices:["ばすがいつ到着するか教えてください","どこに住んでいるか知らない","いくらか知りたい","彼に会っていない"] },
+      { id:"u13-b17", page:83, prompt:"＿＿＿", answer:"いくらか知りたい", choices:["いくらか知りたい","手伝えなくてごめん","いいニュースだ","時間がないことだ"] },
+
+      // Unit 14: blue Japanese notes and Japanese sentence portions.
+      { id:"u14-b1", page:88, prompt:"準動詞とは、不定詞、動名詞、分詞の3つを分類する＿＿＿のこと。", answer:"グループ", choices:["グループ","主節","副詞節","最小単位"] },
+      { id:"u14-b2", page:88, prompt:"準動詞の共通点は、動詞を使いながら＿＿＿になるようにすること。", answer:"品詞", choices:["品詞","主語","目的語","補語"] },
+      { id:"u14-b3", page:88, prompt:"表の青字：不定詞が働く品詞のひとつは＿＿＿", answer:"名詞", choices:["名詞","主語","従属","最小単位"] },
+      { id:"u14-b4", page:88, prompt:"表の青字：不定詞が働く品詞のひとつは＿＿＿", answer:"形容詞", choices:["形容詞","副詞節","目的語","主節"] },
+      { id:"u14-b5", page:88, prompt:"表の青字：不定詞が働く品詞のひとつは＿＿＿", answer:"副詞", choices:["副詞","名詞節","補語","等しいもの"] },
+      { id:"u14-b6", page:88, prompt:"動名詞は＿＿＿と同じ働きをする。", answer:"名詞", choices:["名詞","形容詞","副詞","主節"] },
+      { id:"u14-b7", page:88, prompt:"動名詞は、文中で＿＿＿、目的語、補語の役割を果たす。", answer:"主語", choices:["主語","従属","形容詞","副詞節"] },
+      { id:"u14-b8", page:88, prompt:"動名詞は、文中で主語、＿＿＿、補語の役割を果たす。", answer:"目的語", choices:["目的語","主節","名詞","最小単位"] },
+      { id:"u14-b9", page:88, prompt:"動名詞は、文中で主語、目的語、＿＿＿の役割を果たす。", answer:"補語", choices:["補語","副詞","従属","形容詞"] },
+      { id:"u14-b10", page:88, prompt:"歌うことの前にある前置詞についての青字メモ：＿＿＿", answer:"前置詞→目的語", choices:["前置詞→目的語","主語","補語","副詞節"] },
+      { id:"u14-b11", page:89, prompt:"不定詞は、＿＿＿の行為、あるいはポジティブな意味の目的語とすることが多い。", answer:"これから", choices:["これから","既にやっている","〜の時","〜の間"] },
+      { id:"u14-b12", page:89, prompt:"動名詞は、＿＿＿行為、あるいはネガティブな意味の目的語とすることが多い。", answer:"既にやっている", choices:["既にやっている","これから","〜前に","〜までずっと"] },
+      { id:"u14-b13", page:89, prompt:"希望を表す語の青字メモ：＿＿＿", answer:"先のこと", choices:["先のこと","もうやってる","最小単位","等しいもの"] },
+      { id:"u14-b14", page:89, prompt:"回避を表す語の青字メモ：＿＿＿", answer:"もうやってる", choices:["もうやってる","先のこと","主節","形容詞"] },
+      { id:"u14-b15", page:89, prompt:"動名詞の前に＿＿＿もしくは目的格を置く。", answer:"所有格", choices:["所有格","主語","補語","副詞節"] },
+      { id:"u14-b16", page:89, prompt:"動名詞の前に所有格もしくは＿＿＿を置く。", answer:"目的格", choices:["目的格","目的語","主節","形容詞"] },
+      { id:"u14-b17", page:88, prompt:"スイミングは＿＿＿", answer:"いい運動です", choices:["いい運動です","レポートを書き終えた","旅行がお気に入り","歌うことが得意"] },
+      { id:"u14-b18", page:88, prompt:"彼女はレポートを＿＿＿", answer:"書き終えた", choices:["書き終えた","いい運動です","歌うことが得意","窓を開けてもいいですか"] },
+      { id:"u14-b19", page:88, prompt:"＿＿＿", answer:"私は旅行がお気に入り", choices:["私は旅行がお気に入り","彼女はレポートを書き終えた","歌うことが得意","いい運動です"] },
+      { id:"u14-b20", page:88, prompt:"＿＿＿", answer:"歌うことが得意", choices:["歌うことが得意","いい運動です","旅行がお気に入り","早く寝た"] },
+      { id:"u14-b21", page:89, prompt:"彼女は試験に合格することを＿＿＿", answer:"望む", choices:["望む","避けている","得意","驚いた"] },
+      { id:"u14-b22", page:89, prompt:"彼女は私の質問に答えることを＿＿＿", answer:"避けている", choices:["避けている","望む","驚いた","お気に入り"] },
+      { id:"u14-b23", page:89, prompt:"＿＿＿", answer:"窓を開けてくれませんか", choices:["窓を開けてくれませんか","彼女は試験に合格することを望む","彼に会っていない","手伝えなくてごめん"] },
+      { id:"u14-b24", page:89, prompt:"＿＿＿", answer:"私が窓を開けてもいいですか", choices:["私が窓を開けてもいいですか","窓を開けてくれませんか","いい運動です","時間がないことだ"] },
+      { id:"u14-b25", page:89, prompt:"私はその車が急に止まったことに＿＿＿", answer:"驚いた", choices:["驚いた","望む","避けている","得意"] }
+    ];
+
     // Target Page List (8 Selected Pages)
     const PAGE_LIST = [70, 71, 76, 77, 82, 83, 88, 89];
 
@@ -169,6 +265,24 @@
         .replace(/\s+/g, " ")
         .trim();
     };
+
+    function getWrongCharacterIndexes(input, expected) {
+      const a = input || "", b = expected || "";
+      const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+      for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+      for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+      for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+        dp[i][j] = a[i - 1].toLowerCase() === b[j - 1].toLowerCase() ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+      const wrong = new Set(); let i = a.length, j = b.length;
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && a[i - 1].toLowerCase() === b[j - 1].toLowerCase() && dp[i][j] === dp[i - 1][j - 1]) { i--; j--; continue; }
+        if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) { wrong.add(i - 1); i--; j--; continue; }
+        if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) { wrong.add(i - 1); i--; continue; }
+        j--;
+      }
+      return wrong;
+    }
 
     // Helper: Speech synthesis
     const speakText = (text, rate = 1.0) => {
@@ -186,6 +300,49 @@
       }
     };
 
+    // Small original dog illustrations; the palette and ears vary by question.
+    function DogSticker({ seed = 0, size = 76, question = null }) {
+      const subject = question ? `${question.jp} ${question.en}` : "";
+      const prop = /snow|ski|スキー|スノボ/i.test(subject) ? "🎿" : /robot|ロボット/i.test(subject) ? "🤖" : /plane|airplane|飛行機/i.test(subject) ? "✈️" : /train|電車/i.test(subject) ? "🚆" : /computer|online|パソコン|オンライン/i.test(subject) ? "💻" : /exam|試験/i.test(subject) ? "📚" : /movie|映画/i.test(subject) ? "🎬" : /game|ゲーム/i.test(subject) ? "🎮" : /match|試合/i.test(subject) ? "⚽" : /lottery|宝くじ/i.test(subject) ? "🎟️" : /jog|ジョギング/i.test(subject) ? "🏃" : /magazine|雑誌|book|宿題|assignment/i.test(subject) ? "📖" : /karaoke|カラオケ|voice|声/i.test(subject) ? "🎤" : /shoes|靴/i.test(subject) ? "👟" : /health|健康|sick|気持ちが悪/i.test(subject) ? "🌿" : /cat|猫/i.test(subject) ? "🐱" : /rain|雨/i.test(subject) ? "🌧️" : /hot|暑/i.test(subject) ? "☀️" : /cold|寒/i.test(subject) ? "🧣" : /time|時間|birthday|誕生日/i.test(subject) ? "⏰" : /street|traffic|intersection|道|信号|交差点/i.test(subject) ? "🚦" : /business|job|仕事/i.test(subject) ? "🧹" : /eat|food|食|beef|chicken/i.test(subject) ? "🍖" : /sleep|寝/i.test(subject) ? "💤" : "🐾";
+      const palettes = [
+        ['#f6c77a','#8a542e','#fff1d6'], ['#e7edf6','#52627a','#ffffff'], ['#d98b55','#71391f','#ffe0ae'],
+        ['#bd8b68','#5b3c2a','#f5dfc4'], ['#f4e6c8','#b8844d','#fff8e9'], ['#9b6b4d','#563521','#e9c3a0'],
+        ['#d8aa72','#79502e','#fff0d3'], ['#e9b6a0','#925a4b','#ffe7da']
+      ];
+      const [coat, ear, muzzle] = palettes[Math.abs(seed) % palettes.length];
+      const floppy = seed % 2 === 0;
+      return <svg role="img" aria-label="かわいい犬のイラスト" width={size} height={size} viewBox="0 0 100 100" className="shrink-0 drop-shadow-lg" style={{ transform: `rotate(${(seed % 7) - 3}deg)` }}>
+        <circle cx="50" cy="51" r="46" fill={['#dbeafe','#fef3c7','#dcfce7','#fce7f3','#ede9fe'][Math.abs(seed)%5]} />
+        {floppy ? <><path d="M24 35 Q8 37 15 69 Q22 83 36 65Z" fill={ear}/><path d="M76 35 Q92 37 85 69 Q78 83 64 65Z" fill={ear}/></> : <><path d="M22 48 20 16 Q39 24 42 43Z" fill={ear}/><path d="M78 48 80 16 Q61 24 58 43Z" fill={ear}/></>}
+        <ellipse cx="50" cy="53" rx="32" ry="34" fill={coat}/><ellipse cx="50" cy="65" rx="19" ry="14" fill={muzzle}/>
+        <ellipse cx="39" cy="51" rx="3.4" ry="4.4" fill="#30241f"/><ellipse cx="61" cy="51" rx="3.4" ry="4.4" fill="#30241f"/>
+        <circle cx="38" cy="49" r="1.1" fill="white"/><circle cx="60" cy="49" r="1.1" fill="white"/>
+        <ellipse cx="50" cy="62" rx="5" ry="3.8" fill="#30241f"/><path d="M50 66 Q46 72 41 68 M50 66 Q54 72 59 68" fill="none" stroke="#70433c" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="25" cy="59" r="2.2" fill="#f28b82" opacity=".75"/><circle cx="75" cy="59" r="2.2" fill="#f28b82" opacity=".75"/>
+        {seed % 3 === 0 && <path d="M67 27 Q76 19 82 27 Q76 35 67 27Z" fill="#fb7185"/>}
+        {seed % 3 === 1 && <circle cx="50" cy="22" r="4" fill="#60a5fa"/>}
+        {seed % 3 === 2 && <path d="M43 81 Q50 75 57 81 L55 86 L45 86Z" fill="#fbbf24"/>}
+        {question && <><circle cx="82" cy="20" r="14" fill="white" stroke="#cbd5e1" strokeWidth="1.5"/><text x="82" y="26" textAnchor="middle" fontSize="17">{prop}</text></>}
+      </svg>;
+    }
+
+    function DogForQuestion({ q, size = 68 }) {
+      const seed = q.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+      return <DogSticker seed={seed} size={size} question={q} />;
+    }
+
+    function useEnterToNext(enabled, next) {
+      useEffect(() => {
+        const onKeyDown = (event) => {
+          if (event.key !== 'Enter' || !enabled || event.isComposing) return;
+          event.preventDefault();
+          next();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+      }, [enabled, next]);
+    }
+
     // ----------------------------------------------------
     // Main React Application
     // ----------------------------------------------------
@@ -193,6 +350,7 @@
       const [selectedPage, setSelectedPage] = useState("all");
       const [questionType, setQuestionType] = useState("all");
       const [currentMode, setCurrentMode] = useState("fill");
+      const [cerberusRunning, setCerberusRunning] = useState(true);
       
       const [mistakes, setMistakes] = useState(() => {
         const saved = localStorage.getItem("english_prep_mistakes_8pages");
@@ -230,6 +388,8 @@
         });
       }, [selectedPage, questionType]);
 
+      const japaneseItems = JP_STUDY_ITEMS.filter(item => selectedPage === "all" || item.page === Number(selectedPage));
+
       const addMistake = (qId) => {
         if (!mistakes.includes(qId)) {
           setMistakes(prev => [...prev, qId]);
@@ -256,9 +416,14 @@
       };
 
       return (
-        <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-3 sm:p-6">
+        <div className="relative z-10 flex-1 flex flex-col max-w-6xl w-full mx-auto p-3 sm:p-6">
+          <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
+            <div className="grid grid-cols-12 md:grid-cols-16 xl:grid-cols-20 place-items-center gap-x-1 opacity-[0.18]">
+              {Array.from({ length: 140 }, (_, i) => <DogSticker key={`wall-dog-${i}`} seed={i + 40} size={38} />)}
+            </div>
+          </div>
           {/* Header */}
-          <header className="bg-slate-800/80 backdrop-blur border border-slate-700/80 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl">
+          <header className="relative z-10 bg-slate-800/85 backdrop-blur border border-slate-700/80 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
@@ -275,6 +440,12 @@
                 <p className="text-slate-400 text-sm mt-1">
                   対象8ページ (P.70, 71, 76, 77, 82, 83, 88, 89) 徹底特訓！
                 </p>
+                <p className="text-xs text-indigo-200 mt-1">回答したあと Enter キーで次の問題へ</p>
+                <div className="flex flex-wrap items-center gap-1 mt-3" aria-label="犬のイラストたち">
+                  {[2, 3, 4, 5, 6, 7].map(seed => <DogSticker key={seed} seed={seed} size={48} />)}
+                  <span className="text-amber-200 text-xs font-bold ml-2">今日のわんこ応援団！</span>
+                  <button onClick={() => setCerberusRunning(v => !v)} className={`ml-2 px-3 py-1.5 rounded-lg text-xs font-bold border ${cerberusRunning ? "bg-amber-500 text-slate-950 border-amber-300" : "bg-slate-900 text-slate-200 border-slate-600"}`} aria-pressed={cerberusRunning}>{cerberusRunning ? "🐕‍🦺 ケルベロス走行中：停止" : "🐕‍🦺 ケルベロスを走らせる"}</button>
+                </div>
               </div>
 
               {/* Statistics */}
@@ -366,7 +537,7 @@
           </header>
 
           {/* Practice Mode Navigation */}
-          <nav className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-6">
+          <nav className="relative z-10 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2 mb-6">
             <button
               onClick={() => setCurrentMode("fill")}
               className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
@@ -444,6 +615,9 @@
               )}
             </button>
 
+            <button onClick={() => setCurrentMode("japaneseQuiz")} className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${currentMode === "japaneseQuiz" ? "bg-amber-600 border-amber-400 text-white shadow-lg" : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"}`}><i className="fa-solid fa-language text-amber-300"></i>日本語穴埋め（4択）</button>
+            <button onClick={() => setCurrentMode("japaneseMemory")} className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${currentMode === "japaneseMemory" ? "bg-pink-600 border-pink-400 text-white shadow-lg" : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"}`}><i className="fa-solid fa-brain text-pink-300"></i>日本語暗記</button>
+
             <button
               onClick={() => setCurrentMode("flashcards")}
               className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
@@ -458,7 +632,7 @@
           </nav>
 
           {/* Mode Area */}
-          <main className="flex-1 flex flex-col">
+          <main className="relative z-10 flex-1 flex flex-col">
             {currentMode === "fill" && (
               <FillInMode
                 questions={filteredQuestions}
@@ -514,6 +688,9 @@
               />
             )}
 
+            {currentMode === "japaneseQuiz" && <JapaneseChoiceMode items={japaneseItems} recordResult={recordResult} />}
+            {currentMode === "japaneseMemory" && <JapaneseMemoryMode items={japaneseItems} />}
+
             {currentMode === "flashcards" && (
               <FlashcardMode
                 questions={filteredQuestions}
@@ -522,8 +699,67 @@
               />
             )}
           </main>
+          {cerberusRunning && <CerberusRunner />}
         </div>
       );
+    }
+
+    function JapaneseChoiceMode({ items, recordResult }) {
+      const [index, setIndex] = useState(0);
+      const [selected, setSelected] = useState(null);
+      const q = items[index];
+      useEffect(() => { setIndex(0); setSelected(null); }, [items]);
+      useEffect(() => { setSelected(null); }, [index, q]);
+      useEnterToNext(selected !== null, () => { if (index < items.length - 1) setIndex(index + 1); });
+      if (!q) return <div className="bg-slate-800 rounded-2xl p-10 text-center text-slate-200">このページの文法項目はありません。</div>;
+      const answer = i => {
+        if (selected !== null) return;
+        setSelected(i);
+        const ok = q.choices[i] === q.answer;
+        recordResult(ok);
+      };
+      const next = () => { if (index < items.length - 1) setIndex(index + 1); };
+      return <section className="bg-slate-800/95 border border-amber-400/60 rounded-2xl p-5 sm:p-8 shadow-xl">
+        <div className="flex justify-between items-center gap-3 mb-5"><span className="px-3 py-1.5 rounded-lg bg-amber-950 text-amber-200 font-bold text-sm">添付資料の青字・日本語だけ</span><span className="text-slate-300 text-sm">{index + 1} / {items.length}</span></div>
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-950 p-5 mb-5"><p className="text-xl sm:text-3xl font-bold leading-loose text-white">{q.prompt}</p><DogSticker seed={q.page + index} size={100} /></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{q.choices.map((opt, i) => <button key={`${opt}-${i}`} onClick={() => answer(i)} disabled={selected !== null} className={`p-4 rounded-xl border-2 text-left text-lg font-bold flex gap-3 items-center ${selected === null ? "bg-slate-900 border-slate-600 text-white hover:border-amber-400" : opt === q.answer ? "bg-emerald-950 border-emerald-400 text-emerald-100" : i === selected ? "bg-rose-950 border-rose-400 text-rose-100" : "bg-slate-900 border-slate-700 text-slate-500"}`}><span className="bg-slate-700 px-2.5 py-1 rounded-lg text-sm">{String.fromCharCode(65+i)}</span>{opt}</button>)}</div>
+        {selected !== null && <div className="mt-5 p-4 rounded-xl bg-slate-950 border border-slate-600 text-white"><div className="font-bold text-emerald-300">{q.choices[selected] === q.answer ? "正解！" : `正解は「${q.answer}」です。`}</div><p className="text-xs text-slate-400 mt-2">Enterキーでも次の問題へ進めます。</p></div>}
+        <div className="flex justify-end mt-6"><button onClick={next} disabled={index === items.length-1} className="px-5 py-3 rounded-xl bg-amber-600 text-white font-bold disabled:opacity-40">次へ →</button></div>
+      </section>;
+    }
+
+    function JapaneseMemoryMode({ items }) {
+      const [view, setView] = useState("cards");
+      const [index, setIndex] = useState(0);
+      const [revealed, setRevealed] = useState(false);
+      const q = items[index];
+      useEffect(() => { setIndex(0); setRevealed(false); }, [items]);
+      useEffect(() => { setRevealed(false); }, [index, q]);
+      const next = () => { if (index < items.length-1) setIndex(index+1); };
+      useEnterToNext(view === "cards" && revealed, next);
+      if (!q) return <div className="bg-slate-800 rounded-2xl p-10 text-center text-slate-200">このページの文法項目はありません。</div>;
+      return <section className="bg-slate-800/95 border border-pink-400/60 rounded-2xl p-5 sm:p-8 shadow-xl">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-5"><span className="px-3 py-1.5 rounded-lg bg-pink-950 text-pink-200 font-bold">日本語暗記</span><div className="flex gap-2"><button onClick={() => setView("cards")} className={`px-4 py-2 rounded-lg text-sm font-bold ${view === "cards" ? "bg-pink-600 text-white" : "bg-slate-700 text-slate-200"}`}>カード</button><button onClick={() => setView("list")} className={`px-4 py-2 rounded-lg text-sm font-bold ${view === "list" ? "bg-pink-600 text-white" : "bg-slate-700 text-slate-200"}`}>一覧表</button></div></div>
+        {view === "list" ? <div className="overflow-x-auto rounded-xl border border-slate-600"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-pink-200"><tr><th className="p-3 whitespace-nowrap">ページ</th><th className="p-3 min-w-72">青字の内容</th><th className="p-3 whitespace-nowrap">答え</th></tr></thead><tbody>{items.map((item,i)=><tr key={item.id} className={i%2 ? "bg-slate-800" : "bg-slate-900"}><td className="p-3 text-slate-300 whitespace-nowrap">P.{item.page}</td><td className="p-3 text-white">{item.prompt.replace("＿＿＿", "（　　　）")}</td><td className="p-3 text-pink-200 font-extrabold whitespace-nowrap">{item.answer}</td></tr>)}</tbody></table></div> : <>
+          <div className="text-right text-slate-300 text-sm mb-3">{index+1} / {items.length}</div>
+          <div className="min-h-72 rounded-2xl bg-slate-950 border border-slate-600 p-6 sm:p-10 flex flex-col items-center justify-center text-center"><DogSticker seed={q.page + index} size={132} /><p className="mt-4 text-xl sm:text-3xl font-bold leading-loose text-white">{revealed ? q.prompt.replace("＿＿＿", q.answer) : q.prompt}</p>{!revealed ? <button onClick={() => setRevealed(true)} className="mt-6 px-6 py-3 rounded-xl bg-pink-600 text-white font-bold">答えを見る</button> : <p className="mt-4 text-pink-200 font-bold">答え：{q.answer}</p>}</div>
+          <div className="flex justify-between items-center mt-6"><button onClick={() => setIndex(Math.max(0,index-1))} disabled={index===0} className="px-4 py-3 rounded-xl bg-slate-700 text-white font-bold disabled:opacity-40">← 前へ</button><span className="text-xs text-slate-400">答えを見たら Enter で次へ</span><button onClick={next} disabled={index===items.length-1} className="px-5 py-3 rounded-xl bg-pink-600 text-white font-bold disabled:opacity-40">次へ →</button></div>
+        </>}
+      </section>;
+    }
+
+    function CerberusRunner() {
+      return <div className="cerberus-runner" aria-label="人や動物を追いかけて画面を走る三つ首のケルベロス犬" role="img"><svg viewBox="0 0 430 210" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="166" cy="169" rx="120" ry="12" fill="#020617" opacity=".32"/>
+        <path d="M80 112 Q104 82 190 90 Q242 91 273 120 L259 150 107 151Z" fill="#b86e37" stroke="#512d1c" strokeWidth="5"/><path d="M99 103 Q71 85 61 105 Q76 116 100 114Z" fill="#8b4f2c" stroke="#512d1c" strokeWidth="4"/>
+        <path d="M121 142 105 177 119 180 143 151 M211 142 228 176 242 175 238 137" fill="#9a5731" stroke="#512d1c" strokeWidth="5" strokeLinejoin="round"/><path d="M110 176h17 M226 176h18" stroke="#f3d0a0" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M125 97 Q111 58 100 48 M165 94 Q162 49 165 39 M205 98 Q221 59 233 48" fill="none" stroke="#b86e37" strokeWidth="18" strokeLinecap="round"/>
+        {[{x:90,y:42},{x:165,y:31},{x:242,y:42}].map((h,i)=><g key={i}><path d={`M${h.x-22} ${h.y+8} Q${h.x-38} ${h.y-13} ${h.x-25} ${h.y-27} Q${h.x-9} ${h.y-24} ${h.x-6} ${h.y-7} M${h.x+20} ${h.y+8} Q${h.x+37} ${h.y-13} ${h.x+24} ${h.y-27} Q${h.x+9} ${h.y-24} ${h.x+6} ${h.y-7}`} fill="#874a2a" stroke="#512d1c" strokeWidth="4"/><ellipse cx={h.x} cy={h.y} rx="27" ry="24" fill="#d99554" stroke="#512d1c" strokeWidth="4"/><ellipse cx={h.x-9} cy={h.y-3} rx="3" ry="4" fill="#211713"/><ellipse cx={h.x+9} cy={h.y-3} rx="3" ry="4" fill="#211713"/><ellipse cx={h.x} cy={h.y+10} rx="8" ry="6" fill="#f5d9b6"/><ellipse cx={h.x} cy={h.y+8} rx="4" ry="3" fill="#211713"/><ellipse cx={h.x} cy={h.y+17} rx="8" ry="6" fill="#43211b"/><path d={`M${h.x-5} ${h.y+12} l3 4 3-4 M${h.x-5} ${h.y+22} l3-4 3 4`} fill="#fff7ed" stroke="#fff7ed" strokeWidth="1"/><path d={`M${h.x-16} ${h.y-24} l-7-10 M${h.x+16} ${h.y-24} l7-10`} stroke="#f4e7d4" strokeWidth="4" strokeLinecap="round"/><path d={`M${h.x-16} ${h.y-9} l8 3 M${h.x+16} ${h.y-9} l-8 3`} stroke="#512d1c" strokeWidth="3" strokeLinecap="round"/></g>)}
+        <path d="M143 105 Q170 93 195 105 L188 119 150 119Z" fill="#fbbf24" stroke="#713f12" strokeWidth="3"/><circle cx="170" cy="111" r="5" fill="#fff7ed"/>
+        <g transform="translate(286 82)" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><circle cx="19" cy="15" r="11" fill="#f6c7a5"/><path d="M15 28 5 58 32 58 25 29Z" fill="#60a5fa"/><path d="M13 56 5 83 M26 56 38 79 M10 37 -2 53 M27 37 39 45" fill="none"/><path d="M13 12 Q20 15 26 12" fill="none"/><text x="1" y="4" fontSize="13" stroke="none" fill="#fef08a">わー！</text></g>
+        <g transform="translate(366 123)" stroke="#334155" strokeWidth="3"><path d="M0 9 Q15 -4 30 9 Q18 22 0 9Z" fill="#f8fafc"/><circle cx="18" cy="7" r="2" fill="#0f172a"/><path d="M28 9 38 13 28 15Z" fill="#fb923c"/><path d="M11 19v8m8-8v8"/></g>
+        <g transform="translate(340 153)" stroke="#334155" strokeWidth="3" strokeLinecap="round"><path d="M0 14 Q8 -2 26 8 L33 18 25 25 4 23Z" fill="#94a3b8"/><path d="M27 8 34 0 37 13" fill="#94a3b8"/><circle cx="24" cy="9" r="2" fill="#0f172a"/><path d="M6 22 1 30m19-8 4 8"/></g>
+      </svg></div>;
     }
 
     // ----------------------------------------------------
@@ -535,8 +771,10 @@
       const [userAnswers, setUserAnswers] = useState({});
       const [feedback, setFeedback] = useState({});
       const [showHint, setShowHint] = useState(false);
+      const [showErrorMarkers, setShowErrorMarkers] = useState({});
       const [isRandomOrder, setIsRandomOrder] = useState(false);
       const [shuffledQuestions, setShuffledQuestions] = useState([]);
+      const answerInputRef = useRef(null);
 
       useEffect(() => {
         if (isRandomOrder) {
@@ -548,6 +786,27 @@
       }, [questions, isRandomOrder]);
 
       const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
+      const q = activeQuestions?.[currentIndex] || activeQuestions?.[0];
+      const answerKey = q ? `${q.id}-${fillType}` : '';
+      const isAnswered = !!q && feedback[answerKey] !== undefined;
+      useEffect(() => {
+        if (q && !feedback[answerKey]) {
+          answerInputRef.current?.focus();
+          answerInputRef.current?.select();
+        }
+      }, [q?.id, currentIndex, fillType]);
+      useEnterToNext(isAnswered, () => {
+        if (currentIndex < activeQuestions.length - 1) setCurrentIndex(currentIndex + 1);
+      });
+
+      const result = feedback[answerKey];
+
+      const targetWord = q?.targetWord || q?.hint?.split('/')[0]?.trim() || "is";
+      const maskedSentence = useMemo(() => {
+        if (!q?.en || !targetWord) return q?.en || '';
+        const regex = new RegExp(`\\b${targetWord}\\b`, "i");
+        return q.en.replace(regex, "[ _____ ]");
+      }, [q, targetWord]);
 
       if (!activeQuestions || activeQuestions.length === 0) {
         return (
@@ -558,17 +817,7 @@
         );
       }
 
-      const q = activeQuestions[currentIndex] || activeQuestions[0];
-      const answerKey = `${q.id}-${fillType}`;
-      const isAnswered = feedback[answerKey] !== undefined;
-      const result = feedback[answerKey];
 
-      const targetWord = q.targetWord || q.hint?.split('/')[0]?.trim() || "is";
-      const maskedSentence = useMemo(() => {
-        if (!q.en || !targetWord) return q.en;
-        const regex = new RegExp(`\\b${targetWord}\\b`, "i");
-        return q.en.replace(regex, "[ _____ ]");
-      }, [q, targetWord]);
 
       const handleCheck = (e) => {
         if (e) e.preventDefault();
@@ -665,16 +914,12 @@
 
             <div className="space-y-4 mb-6">
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">日本語訳</div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">
-                {q.jp}
-              </h2>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
 
               {fillType === "oneWord" && (
                 <div className="p-4 bg-slate-900 border border-slate-700/80 rounded-xl">
                   <div className="text-xs font-bold text-indigo-400 mb-1">虫食い英文:</div>
-                  <p className="text-lg sm:text-xl font-bold font-mono text-slate-200">
-                    {maskedSentence}
-                  </p>
+                  <div className="flex items-center justify-between gap-3"><p className="text-lg sm:text-xl font-bold font-mono text-slate-200">{maskedSentence}</p><DogForQuestion q={q} size={58} /></div>
                 </div>
               )}
 
@@ -709,6 +954,7 @@
                     : `英語を入力してください（全文またはキーフレーズに対応）:`}
                 </label>
                 <input
+                  ref={answerInputRef}
                   type="text"
                   value={userAnswers[answerKey] || ""}
                   onChange={(e) => setUserAnswers({ ...userAnswers, [answerKey]: e.target.value })}
@@ -757,6 +1003,16 @@
                   </button>
                 </div>
 
+                {!result && <div className="mb-4">
+                  <button type="button" onClick={() => setShowErrorMarkers(prev => ({ ...prev, [answerKey]: !prev[answerKey] }))} className="px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm shadow"><i className="fa-solid fa-highlighter mr-2"></i>{showErrorMarkers[answerKey] ? "マーカーを消す" : "間違いにマーカー"}</button>
+                  {showErrorMarkers[answerKey] && (() => {
+                    const typed = userAnswers[answerKey] || "";
+                    const candidates = fillType === "oneWord" ? [targetWord] : [q.blankTarget, q.en].filter(Boolean);
+                    const expected = candidates.sort((a, b) => Math.abs(a.length - typed.length) - Math.abs(b.length - typed.length))[0] || q.en;
+                    const wrongIndexes = getWrongCharacterIndexes(typed, expected);
+                    return <div className="mt-3 p-3 bg-slate-950 border border-amber-400/60 rounded-lg"><div className="text-xs text-amber-200 font-bold mb-1">あなたの入力（赤い部分を確認）</div><p className="font-mono text-lg break-words">{typed.split("").map((char, index) => wrongIndexes.has(index) ? <mark key={index} className="bg-rose-500 text-white rounded-sm px-px">{char}</mark> : <span key={index}>{char}</span>)}</p><div className="text-xs text-slate-400 mt-2">正解: <span className="text-emerald-300 font-mono">{expected}</span></div></div>;
+                  })()}
+                </div>}
                 <div className="space-y-2 text-sm sm:text-base">
                   {fillType === "oneWord" && (
                     <div>
@@ -766,7 +1022,7 @@
                   )}
                   <div>
                     <span className="text-slate-400 text-xs font-bold block">全文英文:</span>
-                    <p className="font-bold text-white font-mono text-base sm:text-lg">{q.en}</p>
+                    <div className="flex items-center justify-between gap-3"><p className="font-bold text-white font-mono text-base sm:text-lg">{q.en}</p><DogForQuestion q={q} size={58} /></div>
                   </div>
                 </div>
               </div>
@@ -887,6 +1143,8 @@
         }
       };
 
+      useEnterToNext(isChecked, handleNext);
+
       const handlePrev = () => {
         if (currentIndex > 0) {
           setCurrentIndex(prev => prev - 1);
@@ -923,9 +1181,7 @@
 
             <div className="mb-6">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">日本語訳</span>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">
-                {q.jp}
-              </h2>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
               {q.hint && (
                 <div className="mt-2 text-xs font-mono text-amber-300">
                   指定語句: [{q.hint}]
@@ -1019,7 +1275,7 @@
                 </div>
                 <div className="mt-2">
                   <span className="text-slate-400 text-xs font-bold block">正解英文:</span>
-                  <p className="font-mono font-bold text-white text-lg">{q.en}</p>
+                  <div className="flex items-center justify-between gap-3"><p className="font-mono font-bold text-white text-lg">{q.en}</p><DogForQuestion q={q} size={58} /></div>
                 </div>
               </div>
             )}
@@ -1128,6 +1384,8 @@
         }
       };
 
+      useEnterToNext(isChecked, handleNext);
+
       const handlePrev = () => {
         if (currentIndex > 0) {
           setCurrentIndex(prev => prev - 1);
@@ -1164,9 +1422,7 @@
 
             <div className="mb-6 space-y-3">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">日本語訳</span>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">
-                {q.jp}
-              </h2>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
 
               <div className="p-4 bg-slate-900/90 border border-teal-500/30 rounded-xl">
                 <p className="text-sm sm:text-base text-slate-200 font-medium">
@@ -1275,7 +1531,7 @@
     }
 
     // ----------------------------------------------------
-    // Mode 4: Error Spotting Mode (Find Mistakes)
+    // Mode 4: Underlined phrase multiple-choice practice
     // ----------------------------------------------------
     function ErrorSpottingMode({ questions, addMistake, removeMistake, recordResult }) {
       const [currentIndex, setCurrentIndex] = useState(0);
@@ -1284,262 +1540,87 @@
       const [isRandomOrder, setIsRandomOrder] = useState(false);
       const [shuffledQuestions, setShuffledQuestions] = useState([]);
 
-      const ERROR_MAP = {
-        "add": { wrong: "adding", desc: "助動詞/接続詞直後の動詞は原形 add になります。" },
-        "multiply": { wrong: "multiplied", desc: "現在形節内は原形動詞 multiply が適切です。" },
-        "prefer": { wrong: "prefers", desc: "主語が you なので動詞は prefer です。" },
-        "dangerous": { wrong: "dangerously", desc: "名詞 activities を飾るのは形容詞 dangerous です。" },
-        "exciting": { wrong: "excited", desc: "活動(物)を修飾するのは exciting が適切です。" },
-        "help": { wrong: "helped", desc: "will の後なので原形 help が正解です。" },
-        "voiced": { wrong: "voicing", desc: "受動態 be voiced の形にします。" },
-        "disturbed": { wrong: "disturbing", desc: "邪魔された受動態は disturbed です。" },
-        "handle": { wrong: "handled", desc: "when you の後は現在形 handle です。" },
-        "crashed": { wrong: "crashing", desc: "主節の述語動詞は過去形 crashed です。" },
-        "froze": { wrong: "freezed", desc: "freeze の過去形は不規則変化の froze です。" },
-        "became": { wrong: "become", desc: "過去の出来事なので過去形 became が必要です。" },
-        "because": { wrong: "although", desc: "理由を表す接続詞は because です。" },
-        "Since": { wrong: "While", desc: "「〜だから」という理由を表す文頭の接続詞は Since です。" },
-        "assignment": { wrong: "assigning", desc: "課題・宿題を表す名詞は assignment です。" },
-        "believe": { wrong: "believing", desc: "can't の後は動詞の原形 believe です。" },
-        "older": { wrong: "old", desc: "than があるため比較級 older が必要です。" },
-        "passed": { wrong: "passing", desc: "that 節内は過去形 passed になります。" },
-        "asked": { wrong: "asking", desc: "過去形の動詞 asked が必要です。" },
-        "wrote": { wrong: "write", desc: "過去の行為なので wrote になります。" },
-        "harmful": { wrong: "harmless", desc: "「害がある」を表す語は harmful です。" },
-        "enjoy": { wrong: "enjoys", desc: "主語 we の動詞は enjoy です。" },
-        "making": { wrong: "make", desc: "is の保護として動名詞 making が必要です。" },
-        "stopped": { wrong: "stopping", desc: "過去形 stopped です。" },
-        "possibility": { wrong: "possible", desc: "前置詞 of の前は名詞 possibility が必要です。" }
-      };
-
       useEffect(() => {
-        if (isRandomOrder) {
-          setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
-        } else {
-          setShuffledQuestions(questions);
-        }
+        setShuffledQuestions(isRandomOrder ? [...questions].sort(() => Math.random() - 0.5) : questions);
         setCurrentIndex(0);
       }, [questions, isRandomOrder]);
 
       const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
       const q = activeQuestions[currentIndex];
+      useEffect(() => { setIsChecked(false); setSelectedChoice(null); }, [currentIndex, q]);
+      useEnterToNext(isChecked, () => setCurrentIndex(i => Math.min(i + 1, activeQuestions.length - 1)));
 
-      useEffect(() => {
-        setIsChecked(false);
-        setSelectedChoice(null);
-      }, [currentIndex, q]);
+      if (!q) return <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center text-slate-300">該当する問題がありません。</div>;
 
-      if (!activeQuestions || activeQuestions.length === 0 || !q) {
-        return (
-          <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-12 text-center text-slate-400">
-            <p>該当する問題がありません。</p>
-          </div>
-        );
-      }
-
-      const words = q.en.split(/\s+/);
-      const targetWord = (q.targetWord || words[0]).replace(/[.,?!'"]/g, "");
-      const errorInfo = ERROR_MAP[targetWord] || { wrong: `${targetWord}ed`, desc: "文脈に合わせた正しい語形を選択してください。" };
-
-      const errorIdx = words.findIndex(w => w.replace(/[.,?!'"]/g, "").toLowerCase() === targetWord.toLowerCase());
-      const safeErrorIdx = errorIdx >= 0 ? errorIdx : 1;
-
-      const chunkSize = Math.max(1, Math.ceil(words.length / 4));
-      const chunks = [];
-      for (let i = 0; i < words.length; i += chunkSize) {
-        chunks.push(words.slice(i, i + chunkSize));
-      }
-      while (chunks.length > 4) {
-        const last = chunks.pop();
-        chunks[chunks.length - 1].push(...last);
-      }
-
-      let correctChunkIndex = 0;
-      let currCount = 0;
-      for (let i = 0; i < chunks.length; i++) {
-        if (safeErrorIdx >= currCount && safeErrorIdx < currCount + chunks[i].length) {
-          correctChunkIndex = i;
-          break;
-        }
-        currCount += chunks[i].length;
-      }
-
-      const displayChunks = chunks.map((chunk, cIdx) => {
-        if (cIdx === correctChunkIndex) {
-          return chunk.map((w) => {
-            if (w.replace(/[.,?!'"]/g, "").toLowerCase() === targetWord.toLowerCase()) {
-              return w.replace(new RegExp(targetWord, "i"), errorInfo.wrong);
-            }
-            return w;
-          }).join(" ");
-        }
-        return chunk.join(" ");
-      });
-
-      const handleSelectChoice = (cIdx) => {
+      const target = q.targetWord || q.en.split(/\s+/)[0].replace(/[.,?!'"]/g, '');
+      const targetPattern = new RegExp(`(${target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'i');
+      const match = q.en.match(targetPattern);
+      const targetText = match ? match[0] : target;
+      const distractors = new Set();
+      if (/^\d+$/.test(targetText)) { const n = Number(targetText); distractors.add(String(n - 1)); distractors.add(String(n + 1)); distractors.add(String(n + 10)); }
+      else if (/ing$/i.test(targetText)) { distractors.add(targetText.replace(/ing$/i, '')); distractors.add(targetText.replace(/ing$/i, 'ed')); distractors.add(targetText.replace(/ing$/i, 's')); }
+      else if (/ed$/i.test(targetText)) { distractors.add(targetText.replace(/ed$/i, '')); distractors.add(targetText.replace(/ed$/i, 'ing')); distractors.add(targetText.replace(/ed$/i, 's')); }
+      else if (/s$/i.test(targetText)) { distractors.add(targetText.replace(/s$/i, '')); distractors.add(targetText + 'ed'); distractors.add(targetText + 'ing'); }
+      else { distractors.add(targetText + 's'); distractors.add(targetText + 'ed'); distractors.add(targetText + 'ing'); }
+      const options = [targetText, ...[...distractors].filter(x => x && x.toLowerCase() !== targetText.toLowerCase()).slice(0, 3)];
+      while (options.length < 4) options.push(targetText + (options.length === 1 ? 'ly' : 'ness'));
+      const shuffledOptions = useMemo(() => {
+        const seed = [...options];
+        // Rotate choices per question so the correct answer does not stay in the same position.
+        const shift = (Number(q.id.split('-')[0]) + q.id.charCodeAt(q.id.length - 1)) % seed.length;
+        return seed.slice(shift).concat(seed.slice(0, shift));
+      }, [q.id, targetText]);
+      const correctIndex = shuffledOptions.findIndex(x => x.toLowerCase() === targetText.toLowerCase());
+      const wrongText = shuffledOptions.find((x, i) => i !== correctIndex) || `${targetText}x`;
+      const labels = ['A', 'B', 'C', 'D'];
+      const choose = (index) => {
         if (isChecked) return;
-        setSelectedChoice(cIdx);
-        setIsChecked(true);
-        const isCorrect = (cIdx === correctChunkIndex);
-        recordResult(isCorrect);
-        if (!isCorrect) {
-          addMistake(q.id);
-        } else {
-          removeMistake(q.id);
-          speakText(q.en);
-        }
+        setSelectedChoice(index); setIsChecked(true);
+        const correct = index === correctIndex;
+        recordResult(correct);
+        if (correct) { removeMistake(q.id); speakText(q.en); } else addMistake(q.id);
       };
-
-      const handleNext = () => {
-        if (currentIndex < activeQuestions.length - 1) {
-          setCurrentIndex(prev => prev + 1);
-        }
-      };
-
-      const handlePrev = () => {
-        if (currentIndex > 0) {
-          setCurrentIndex(prev => prev - 1);
-        }
-      };
-
-      const labels = ["(A)", "(B)", "(C)", "(D)"];
+      const move = (delta) => { setCurrentIndex(i => Math.max(0, Math.min(activeQuestions.length - 1, i + delta))); };
 
       return (
-        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 sm:p-8 shadow-xl flex flex-col justify-between flex-1">
-          <div>
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-700/60 mb-6">
-              <div className="flex items-center gap-2">
-                <span className="bg-slate-700 text-indigo-300 font-bold text-xs px-3 py-1 rounded-md">
-                  P.{q.page} - {q.num}
-                </span>
-                <span className="text-xs font-bold text-rose-300 bg-rose-950/80 border border-rose-800 px-2.5 py-1 rounded-md">
-                  誤り指摘 (文法・語彙ミス)
-                </span>
-                <button
-                  onClick={() => setIsRandomOrder(!isRandomOrder)}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1.5 border ${
-                    isRandomOrder
-                      ? "bg-purple-600 border-purple-400 text-white shadow"
-                      : "bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  <i className="fa-solid fa-shuffle"></i>
-                  {isRandomOrder ? "出題順: ランダム" : "出題順: 順番通り"}
-                </button>
-              </div>
-              <span className="text-slate-400 text-sm font-semibold">
-                問題 {currentIndex + 1} / {activeQuestions.length}
-              </span>
+        <section className="bg-slate-800/90 border border-slate-600 rounded-2xl p-5 sm:p-8 shadow-xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-600 mb-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="bg-slate-700 text-indigo-200 font-bold text-xs px-3 py-1.5 rounded-lg">P.{q.page}・{q.num}</span>
+              <span className="text-xs font-bold text-rose-200 bg-rose-950 border border-rose-700 px-3 py-1.5 rounded-lg">下線部の訂正</span>
+              <button onClick={() => setIsRandomOrder(v => !v)} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-600 bg-slate-900 text-slate-200 hover:bg-slate-700">{isRandomOrder ? '🔀 ランダム順' : '順番通り'}</button>
             </div>
-
-            <div className="mb-6 space-y-3">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">日本語訳</span>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">
-                {q.jp}
-              </h2>
-
-              <div className="p-4 bg-slate-900/90 border border-rose-500/30 rounded-xl">
-                <p className="text-xs sm:text-sm text-rose-300 font-bold mb-1">
-                  ⚠️ 以下の英文には1箇所だけ誤りがあります。誤っている場所(A〜D)を選んでください:
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              {displayChunks.map((chunkText, cIdx) => {
-                let btnStyle = "bg-slate-900 hover:bg-slate-700 text-slate-100 border-slate-700";
-                if (isChecked) {
-                  if (cIdx === correctChunkIndex) {
-                    btnStyle = "bg-emerald-950/90 border-emerald-400 text-emerald-200 shadow-md";
-                  } else if (cIdx === selectedChoice) {
-                    btnStyle = "bg-rose-950/90 border-rose-400 text-rose-200";
-                  } else {
-                    btnStyle = "bg-slate-900/40 border-slate-800 text-slate-600 opacity-50";
-                  }
-                }
-
-                return (
-                  <button
-                    key={cIdx}
-                    onClick={() => handleSelectChoice(cIdx)}
-                    disabled={isChecked}
-                    className={`w-full p-4 border-2 rounded-xl text-base sm:text-lg font-mono font-bold text-left transition flex items-center justify-between ${btnStyle}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-black px-2 py-1 bg-slate-800 text-slate-300 rounded border border-slate-700">
-                        {labels[cIdx] || `(${cIdx+1})`}
-                      </span>
-                      <span>{chunkText}</span>
-                    </div>
-
-                    {isChecked && cIdx === correctChunkIndex && (
-                      <span className="text-emerald-400 text-sm font-sans font-bold flex items-center gap-1">
-                        <i className="fa-solid fa-circle-check"></i> ここが間違い！
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {isChecked && (
-              <div className={`p-5 rounded-xl border ${
-                selectedChoice === correctChunkIndex ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-200" : "bg-rose-950/60 border-rose-500/50 text-rose-200"
-              }`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="font-bold text-lg flex items-center gap-2">
-                    {selectedChoice === correctChunkIndex ? (
-                      <span className="text-emerald-400"><i className="fa-solid fa-circle-check"></i> 大正解！ 間違いを見破りました。</span>
-                    ) : (
-                      <span className="text-rose-400"><i className="fa-solid fa-circle-xmark"></i> 不正解... 正しい誤り位置は {labels[correctChunkIndex]} です。</span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => speakText(q.en)}
-                    className="px-3 py-1 bg-slate-800 text-white text-xs font-bold rounded-lg"
-                  >
-                    <i className="fa-solid fa-volume-high text-rose-300"></i> 音声
-                  </button>
-                </div>
-
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="text-slate-400 text-xs font-bold block">誤りの解説:</span>
-                    <p className="font-bold text-amber-300">
-                      ❌ 「{errorInfo.wrong}」 → ⭕ 「{targetWord}」 ({errorInfo.desc})
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 text-xs font-bold block">正しい英文:</span>
-                    <p className="font-mono font-bold text-white text-base">{q.en}</p>
-                  </div>
-                </div>
-              </div>
-            )}
+            <span className="text-slate-300 text-sm font-semibold">問題 {currentIndex + 1} / {activeQuestions.length}</span>
           </div>
-
-          <div className="flex items-center justify-between mt-8 pt-4 border-t border-slate-700/60">
-            <button
-              onClick={handlePrev}
-              disabled={currentIndex === 0}
-              className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-slate-200 font-bold rounded-xl text-sm transition"
-            >
-              <i className="fa-solid fa-arrow-left"></i> 前へ
-            </button>
-
-            <span className="text-xs text-slate-400 font-bold">
-              {currentIndex + 1} / {activeQuestions.length}
-            </span>
-
-            <button
-              onClick={handleNext}
-              disabled={currentIndex === activeQuestions.length - 1}
-              className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 text-white font-bold rounded-xl text-sm transition shadow-md shadow-rose-600/20"
-            >
-              次へ <i className="fa-solid fa-arrow-right"></i>
-            </button>
+          <div className="mb-6">
+            <div className="text-xs font-bold text-slate-400 mb-2">日本語訳</div>
+            <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-white leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
           </div>
-        </div>
+          <div className="rounded-2xl bg-slate-950 border border-indigo-400/50 p-5 sm:p-7 mb-6">
+            <div className="text-xs font-bold text-rose-300 mb-3">英文（誤りは1か所）</div>
+            <div className="flex items-center justify-between gap-3"><p className="text-lg sm:text-2xl leading-loose font-semibold text-white">{match ? <>{q.en.slice(0, match.index)}<u className="decoration-rose-400 decoration-4 underline-offset-8 text-rose-100">{wrongText}</u>{q.en.slice(match.index + targetText.length)}</> : q.en}</p><DogForQuestion q={q} size={58} /></div>
+            <p className="text-sm text-slate-300 mt-4">下線部の誤りを正しく直す選択肢を選びましょう。</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {shuffledOptions.map((option, index) => {
+              const isAnswer = index === correctIndex;
+              const selected = index === selectedChoice;
+              let style = 'bg-slate-900 border-slate-600 text-white hover:border-indigo-400 hover:bg-slate-700';
+              if (isChecked && isAnswer) style = 'bg-emerald-950 border-emerald-400 text-emerald-100';
+              else if (isChecked && selected) style = 'bg-rose-950 border-rose-400 text-rose-100';
+              return <button key={`${option}-${index}`} onClick={() => choose(index)} disabled={isChecked} className={`min-h-14 p-4 border-2 rounded-xl text-left font-semibold text-lg transition flex items-center gap-3 ${style}`}><span className="rounded-lg bg-slate-700 px-3 py-1 text-sm font-black">{labels[index]}</span><span>{option}</span>{isChecked && isAnswer && <i className="fa-solid fa-circle-check ml-auto text-emerald-300"></i>}</button>;
+            })}
+          </div>
+          {isChecked && <div className={`mt-6 p-5 rounded-xl border ${selectedChoice === correctIndex ? 'bg-emerald-950/70 border-emerald-500 text-emerald-100' : 'bg-rose-950/70 border-rose-500 text-rose-100'}`}>
+            <div className="font-bold text-lg mb-2">{selectedChoice === correctIndex ? '正解です！' : `不正解。正解は ${labels[correctIndex]} です。`}</div>
+            <div className="text-sm text-slate-200">正しい英文</div><div className="flex items-center justify-between gap-3"><p className="font-mono text-white text-base sm:text-lg mt-1">{q.en}</p><DogForQuestion q={q} size={58} /></div>
+            <button onClick={() => speakText(q.en)} className="mt-3 px-4 py-2 bg-slate-800 rounded-lg text-sm font-bold"><i className="fa-solid fa-volume-high mr-2 text-indigo-300"></i>音声</button>
+          </div>}
+          <div className="flex items-center justify-between mt-7 pt-5 border-t border-slate-600">
+            <button onClick={() => move(-1)} disabled={currentIndex === 0} className="px-4 py-3 rounded-xl bg-slate-700 text-white font-bold disabled:opacity-40">← 前へ</button>
+            <button onClick={() => move(1)} disabled={currentIndex === activeQuestions.length - 1} className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold disabled:opacity-40">次へ →</button>
+          </div>
+        </section>
       );
     }
 
@@ -1602,6 +1683,8 @@
           setQuizState("summary");
         }
       };
+
+      useEnterToNext(isAnswered, handleNextQuestion);
 
       if (quizState === "setup") {
         return (
@@ -1731,9 +1814,7 @@
 
             <div className="space-y-4 mb-6">
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">日本語訳</div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">
-                {q.jp}
-              </h2>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogForQuestion q={q} /></div>
               {q.hint && (
                 <div className="text-xs font-mono text-amber-300">
                   指定語句: [{q.hint}]
@@ -1789,7 +1870,7 @@
                 </div>
                 <div>
                   <span className="text-slate-400 text-xs font-bold block">正解英文:</span>
-                  <p className="font-mono font-bold text-white text-lg">{q.en}</p>
+                  <div className="flex items-center justify-between gap-3"><p className="font-mono font-bold text-white text-lg">{q.en}</p><DogForQuestion q={q} size={58} /></div>
                 </div>
               </div>
             )}
@@ -1903,8 +1984,8 @@
                       </span>
                     )}
                   </div>
-                  <div className="text-slate-200 font-bold text-base">{q.jp}</div>
-                  <div className="text-indigo-300 font-mono font-bold text-sm sm:text-base">{q.en}</div>
+                  <div className="flex items-center gap-3"><div className="text-slate-200 font-bold text-base">{q.jp}</div><DogForQuestion q={q} size={54} /></div>
+                  <div className="flex items-center justify-between gap-3"><div className="text-indigo-300 font-mono font-bold text-sm sm:text-base">{q.en}</div><DogForQuestion q={q} size={48} /></div>
                 </div>
 
                 <div className="flex items-center gap-2 self-end md:self-center shrink-0">
@@ -1952,6 +2033,7 @@
 
       const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
       const q = activeQuestions[currentIndex];
+      useEnterToNext(true, () => setCurrentIndex(i => Math.min(i + 1, activeQuestions.length - 1)));
 
       useEffect(() => {
         setIsFlipped(false);
@@ -2069,9 +2151,7 @@
                   </div>
 
                   <div className="my-auto text-center py-6">
-                    <h3 className="text-xl sm:text-3xl font-extrabold text-white leading-relaxed">
-                      {q.jp}
-                    </h3>
+                    <div className="flex items-center justify-center gap-4"><h3 className="text-xl sm:text-3xl font-extrabold text-white leading-relaxed">{q.jp}</h3><DogForQuestion q={q} size={92} /></div>
                     {q.hint && (
                       <p className="mt-3 text-xs sm:text-sm font-mono text-amber-300">
                         ヒント: [{q.hint}]
@@ -2097,9 +2177,7 @@
                   </div>
 
                   <div className="my-auto text-center py-6">
-                    <p className="text-xl sm:text-3xl font-mono font-extrabold text-emerald-300 leading-relaxed">
-                      {q.en}
-                    </p>
+                    <div className="flex items-center justify-center gap-4"><p className="text-xl sm:text-3xl font-mono font-extrabold text-emerald-300 leading-relaxed">{q.en}</p><DogForQuestion q={q} size={88} /></div>
                   </div>
 
                   <div className="text-center text-xs text-slate-500 font-bold">
