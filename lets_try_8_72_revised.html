@@ -63,7 +63,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
     // ----------------------------------------------------
     // Full Dataset: 72 Questions (Pages: 70, 71, 76, 77, 82, 83, 88, 89)
@@ -292,9 +292,14 @@
       };
 
       return (
-        <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-3 sm:p-6">
+        <div className="relative z-10 flex-1 flex flex-col max-w-6xl w-full mx-auto p-3 sm:p-6">
+          <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
+            <div className="grid grid-cols-12 md:grid-cols-16 xl:grid-cols-20 place-items-center gap-x-1 opacity-[0.18]">
+              {Array.from({ length: 140 }, (_, i) => <DogSticker key={`wall-dog-${i}`} seed={i + 40} size={38} />)}
+            </div>
+          </div>
           {/* Header */}
-          <header className="bg-slate-800/80 backdrop-blur border border-slate-700/80 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl">
+          <header className="relative z-10 bg-slate-800/85 backdrop-blur border border-slate-700/80 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
@@ -407,7 +412,7 @@
           </header>
 
           {/* Practice Mode Navigation */}
-          <nav className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-6">
+          <nav className="relative z-10 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-6">
             <button
               onClick={() => setCurrentMode("fill")}
               className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
@@ -499,7 +504,7 @@
           </nav>
 
           {/* Mode Area */}
-          <main className="flex-1 flex flex-col">
+          <main className="relative z-10 flex-1 flex flex-col">
             {currentMode === "fill" && (
               <FillInMode
                 questions={filteredQuestions}
@@ -578,6 +583,7 @@
       const [showHint, setShowHint] = useState(false);
       const [isRandomOrder, setIsRandomOrder] = useState(false);
       const [shuffledQuestions, setShuffledQuestions] = useState([]);
+      const answerInputRef = useRef(null);
 
       useEffect(() => {
         if (isRandomOrder) {
@@ -589,6 +595,27 @@
       }, [questions, isRandomOrder]);
 
       const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
+      const q = activeQuestions?.[currentIndex] || activeQuestions?.[0];
+      const answerKey = q ? `${q.id}-${fillType}` : '';
+      const isAnswered = !!q && feedback[answerKey] !== undefined;
+      useEffect(() => {
+        if (q && !feedback[answerKey]) {
+          answerInputRef.current?.focus();
+          answerInputRef.current?.select();
+        }
+      }, [q?.id, currentIndex, fillType]);
+      useEnterToNext(isAnswered, () => {
+        if (currentIndex < activeQuestions.length - 1) setCurrentIndex(currentIndex + 1);
+      });
+
+      const result = feedback[answerKey];
+
+      const targetWord = q?.targetWord || q?.hint?.split('/')[0]?.trim() || "is";
+      const maskedSentence = useMemo(() => {
+        if (!q?.en || !targetWord) return q?.en || '';
+        const regex = new RegExp(`\\b${targetWord}\\b`, "i");
+        return q.en.replace(regex, "[ _____ ]");
+      }, [q, targetWord]);
 
       if (!activeQuestions || activeQuestions.length === 0) {
         return (
@@ -599,17 +626,7 @@
         );
       }
 
-      const q = activeQuestions[currentIndex] || activeQuestions[0];
-      const answerKey = `${q.id}-${fillType}`;
-      const isAnswered = feedback[answerKey] !== undefined;
-      const result = feedback[answerKey];
 
-      const targetWord = q.targetWord || q.hint?.split('/')[0]?.trim() || "is";
-      const maskedSentence = useMemo(() => {
-        if (!q.en || !targetWord) return q.en;
-        const regex = new RegExp(`\\b${targetWord}\\b`, "i");
-        return q.en.replace(regex, "[ _____ ]");
-      }, [q, targetWord]);
 
       const handleCheck = (e) => {
         if (e) e.preventDefault();
@@ -643,8 +660,6 @@
           setCurrentIndex(prev => prev + 1);
         }
       };
-
-      useEnterToNext(isAnswered, handleNext);
 
       const handlePrev = () => {
         setShowHint(false);
@@ -750,6 +765,7 @@
                     : `英語を入力してください（全文またはキーフレーズに対応）:`}
                 </label>
                 <input
+                  ref={answerInputRef}
                   type="text"
                   value={userAnswers[answerKey] || ""}
                   onChange={(e) => setUserAnswers({ ...userAnswers, [answerKey]: e.target.value })}
