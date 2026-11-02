@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LET'S TRY 定期テスト対策マスター (8ページ集中版)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React 18 & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+      background: radial-gradient(ellipse at top, #243451 0%, #111827 55%, #0b1220 100%);
+      color: #f8fafc;
+      line-height: 1.65;
+    }
+    .card-flip {
+      perspective: 1000px;
+    }
+    .card-inner {
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .card-flipped {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // ----------------------------------------------------
+    // Full Dataset: 72 Questions (Pages: 70, 71, 76, 77, 82, 83, 88, 89)
+    // ----------------------------------------------------
+    const QUESTIONS_DATA = [
+      // Page 70
+      { id: "70-1A", page: 70, num: "1-A", type: "basic", jp: "15足す30は45です。", en: "When we add 15 and 30, we get 45.", hint: "", blankTarget: "When we add 15 and 30, we get 45", targetWord: "add" },
+      { id: "70-1B", page: 70, num: "1-B", type: "practice", jp: "5足す10は15です。", en: "When we add 5 and 10, we get 15.", hint: "fifteen", blankTarget: "15", targetWord: "15" },
+      { id: "70-1C", page: 70, num: "1-C", type: "practice", jp: "15かける30は450です。", en: "When we multiply 15 and 30 together, we get 450.", hint: "multiply / together", blankTarget: "multiply 15 and 30 together", targetWord: "multiply" },
+      { id: "70-2A", page: 70, num: "2-A", type: "basic", jp: "飛行機と電車、どちらがいいですか。", en: "Which do you prefer, planes or trains?", hint: "", blankTarget: "Which do you prefer, planes or trains?", targetWord: "prefer" },
+      { id: "70-2B", page: 70, num: "2-B", type: "practice", jp: "ビーフとチキン、どちらがいいですか。", en: "Which do you prefer, beef or chicken?", hint: "beef / chicken", blankTarget: "beef or chicken", targetWord: "beef" },
+      { id: "70-2C", page: 70, num: "2-C", type: "practice", jp: "通路側の席と窓側の席、どちらがいいですか。", en: "Which do you prefer, an aisle seat or a window seat?", hint: "aisle seat / window seat", blankTarget: "an aisle seat or a window seat", targetWord: "aisle" },
+      { id: "70-3A", page: 70, num: "3-A", type: "basic", jp: "スノボとスキーは危険なアクティビティです。", en: "Snowboarding and skiing are dangerous activities.", hint: "", blankTarget: "Snowboarding and skiing are dangerous activities", targetWord: "dangerous" },
+      { id: "70-3B", page: 70, num: "3-B", type: "practice", jp: "スノボとスキーは楽しいアクティビティです。", en: "Snowboarding and skiing are exciting activities.", hint: "exciting", blankTarget: "exciting activities", targetWord: "exciting" },
+      { id: "70-3C", page: 70, num: "3-C", type: "practice", jp: "スノボとスキーは危険だけど楽しいアクティビティです。", en: "Snowboarding and skiing are dangerous but exciting activities.", hint: "but", blankTarget: "dangerous but exciting activities", targetWord: "but" },
+
+      // Page 71
+      { id: "71-1A", page: 71, num: "1-A", type: "basic", jp: "私はロボットを作って子どもたちを助けます。", en: "I will make a robot and help children.", hint: "", blankTarget: "I will make a robot and help children", targetWord: "help" },
+      { id: "71-1B", page: 71, num: "1-B", type: "practice", jp: "私はロボットを作って世界中の人々を助けます。", en: "I will make a robot and help people around the world.", hint: "around the world", blankTarget: "around the world", targetWord: "around" },
+      { id: "71-1C", page: 71, num: "1-C", type: "practice", jp: "私はロボットを作って世界中の障害のある人々を助けます。", en: "I will make a robot and help people with disabilities around the world.", hint: "with disabilities", blankTarget: "with disabilities", targetWord: "disabilities" },
+      { id: "71-2A", page: 71, num: "2-A", type: "basic", jp: "このキャラクターに声をあてるのは彼ですか、彼女ですか。", en: "Will this character be voiced by him or by her?", hint: "", blankTarget: "Will this character be voiced by him or by her?", targetWord: "voiced" },
+      { id: "71-2B", page: 71, num: "2-B", type: "practice", jp: "このキャラクターに声をあてるのは男性声優ですか、女性声優ですか。", en: "Will this character be voiced by a male voice actor or by a female voice actor?", hint: "male voice actor / female voice actor", blankTarget: "male voice actor / female voice actor", targetWord: "male" },
+      { id: "71-2C", page: 71, num: "2-C", type: "practice", jp: "このキャラクターに声をあてるのは若い声優ですか、ベテラン声優ですか。", en: "Will this character be voiced by a young voice actor or by a veteran voice actor?", hint: "veteran", blankTarget: "young voice actor / veteran voice actor", targetWord: "veteran" },
+      { id: "71-3A", page: 71, num: "3-A", type: "basic", jp: "彼女は寝ていたが猫に邪魔された。", en: "She was sleeping but was disturbed by her cat.", hint: "", blankTarget: "She was sleeping but was disturbed by her cat", targetWord: "disturbed" },
+      { id: "71-3B", page: 71, num: "3-B", type: "practice", jp: "彼女は試験勉強していたが猫に邪魔された。", en: "She was studying for an exam but was disturbed by her cat.", hint: "for an exam", blankTarget: "studying for an exam", targetWord: "exam" },
+      { id: "71-3C", page: 71, num: "3-C", type: "practice", jp: "彼女はオンラインミーティングに参加していたが、猫に邪魔された。", en: "She was participating in an online meeting but was disturbed by her cat.", hint: "participate in", blankTarget: "participating in an online meeting", targetWord: "participating" },
+
+      // Page 76
+      { id: "76-1A", page: 76, num: "1-A", type: "basic", jp: "その実験器具を使う時は気をつけて。", en: "You must be careful when you handle the experimental apparatus.", hint: "", blankTarget: "You must be careful when you handle the experimental apparatus", targetWord: "apparatus" },
+      { id: "76-1B", page: 76, num: "1-B", type: "practice", jp: "オンラインで買い物するときは気をつけて。", en: "You must be careful when you shop online.", hint: "shop online", blankTarget: "when you shop online", targetWord: "online" },
+      { id: "76-1C", page: 76, num: "1-C", type: "practice", jp: "その道を渡るときは気をつけて。", en: "You must be careful when you cross the street.", hint: "cross the street", blankTarget: "when you cross the street", targetWord: "cross" },
+      { id: "76-2A", page: 76, num: "2-A", type: "basic", jp: "友達とオンラインで話していたら、パソコンが突然クラッシュした。", en: "While I was chatting with my friends online, my computer crashed suddenly.", hint: "", blankTarget: "While I was chatting with my friends online, my computer crashed suddenly", targetWord: "crashed" },
+      { id: "76-2B", page: 76, num: "2-B", type: "practice", jp: "友達とオンラインで話していたら、パソコンが突然フリーズした。", en: "While I was chatting with my friends online, my computer froze suddenly.", hint: "freeze", blankTarget: "my computer froze suddenly", targetWord: "froze" },
+      { id: "76-2C", page: 76, num: "2-C", type: "practice", jp: "友達とオンラインで話していたら、パソコンが突然遅くなった。", en: "While I was chatting with my friends online, my computer became slow suddenly.", hint: "become slow", blankTarget: "my computer became slow suddenly", targetWord: "became" },
+      { id: "76-3A", page: 76, num: "3-A", type: "basic", jp: "コンビニまでまっすぐ進んでください。", en: "Go straight this way until you get to a convenience store.", hint: "", blankTarget: "Go straight this way until you get to a convenience store", targetWord: "until" },
+      { id: "76-3B", page: 76, num: "3-B", type: "practice", jp: "信号までまっすぐ進んでください。", en: "Go straight this way until you get to the traffic light.", hint: "the traffic light", blankTarget: "until you get to the traffic light", targetWord: "traffic" },
+      { id: "76-3C", page: 76, num: "3-C", type: "practice", jp: "交差点までまっすぐ進んでください。", en: "Go straight this way until you get to the intersection.", hint: "the intersection", blankTarget: "until you get to the intersection", targetWord: "intersection" },
+
+      // Page 77
+      { id: "77-1A", page: 77, num: "1-A", type: "basic", jp: "昨晩夜ふかししたので、眠い。", en: "I am sleepy because I stayed up late last night.", hint: "", blankTarget: "I am sleepy because I stayed up late last night", targetWord: "because" },
+      { id: "77-1B", page: 77, num: "1-B", type: "practice", jp: "今朝朝食を食べなかったので、お腹が空いた。", en: "I am hungry because I didn't eat breakfast this morning.", hint: "hungry", blankTarget: "I am hungry", targetWord: "hungry" },
+      { id: "77-1C", page: 77, num: "1-C", type: "practice", jp: "昨晩食べ過ぎたので、気持ちが悪い。", en: "I feel sick because I ate too much last night.", hint: "sick", blankTarget: "I feel sick", targetWord: "sick" },
+      { id: "77-2A", page: 77, num: "2-A", type: "basic", jp: "昨日はとても暑かったので、外に出たくなかった。", en: "Since it was very hot yesterday, I didn't want to go out.", hint: "", blankTarget: "Since it was very hot yesterday, I didn't want to go out", targetWord: "Since" },
+      { id: "77-2B", page: 77, num: "2-B", type: "practice", jp: "昨日はとても寒かったので、外に出たくなかった。", en: "Since it was very cold yesterday, I didn't want to go out.", hint: "cold", blankTarget: "Since it was very cold yesterday", targetWord: "cold" },
+      { id: "77-2C", page: 77, num: "2-C", type: "practice", jp: "昨日は雨がひどかったので、外に出たくなかった。", en: "Since it was very rainy yesterday, I didn't want to go out.", hint: "rainy", blankTarget: "Since it was very rainy yesterday", targetWord: "rainy" },
+      { id: "77-3A", page: 77, num: "3-A", type: "basic", jp: "宿題も終わったので、寝よう。", en: "Now that I have finished my assignment, I will go to bed.", hint: "", blankTarget: "Now that I have finished my assignment, I will go to bed", targetWord: "assignment" },
+      { id: "77-3B", page: 77, num: "3-B", type: "practice", jp: "宿題も終わったので、あのオンラインゲームをやろう。", en: "Now that I have finished my assignment, I will play that online game.", hint: "that online game", blankTarget: "I will play that online game", targetWord: "game" },
+      { id: "77-3C", page: 77, num: "3-C", type: "practice", jp: "宿題も終わったので、あの映画を見よう。", en: "Now that I have finished my assignment, I will watch that movie.", hint: "that movie", blankTarget: "I will watch that movie", targetWord: "movie" },
+
+      // Page 82
+      { id: "82-1A", page: 82, num: "1-A", type: "basic", jp: "彼が私に嘘をついたなんて信じられない。", en: "I can't believe that he told me a lie.", hint: "", blankTarget: "I can't believe that he told me a lie", targetWord: "believe" },
+      { id: "82-1B", page: 82, num: "1-B", type: "practice", jp: "彼女が私より年上だなんて信じられない。", en: "I can't believe that she is older than me.", hint: "older", blankTarget: "she is older than me", targetWord: "older" },
+      { id: "82-1C", page: 82, num: "1-C", type: "practice", jp: "君が宝くじに当たったなんて信じられない。", en: "I can't believe that you won the lottery.", hint: "win the lottery", blankTarget: "you won the lottery", targetWord: "lottery" },
+      { id: "82-2A", page: 82, num: "2-A", type: "basic", jp: "あなたが試験に合格したという知らせを聞きました。", en: "I heard the news that you passed the exam.", hint: "", blankTarget: "I heard the news that you passed the exam", targetWord: "passed" },
+      { id: "82-2B", page: 82, num: "2-B", type: "practice", jp: "あなたが新しい仕事を見つけたという知らせを聞きました。", en: "I heard the news that you got a new job.", hint: "get a new job", blankTarget: "you got a new job", targetWord: "got" },
+      { id: "82-2C", page: 82, num: "2-C", type: "practice", jp: "あなたが横浜に引っ越したという知らせを聞きました。", en: "I heard the news that you moved to Yokohama.", hint: "move", blankTarget: "you moved to Yokohama", targetWord: "moved" },
+      { id: "82-3A", page: 82, num: "3-A", type: "basic", jp: "あなたが試合に勝って嬉しい。", en: "I'm glad that you won the match.", hint: "", blankTarget: "I'm glad that you won the match", targetWord: "glad" },
+      { id: "82-3B", page: 82, num: "3-B", type: "practice", jp: "あなたが試合に負けて悲しい。", en: "I'm sad that you lost the match.", hint: "sad / lose", blankTarget: "I'm sad that you lost the match", targetWord: "sad" },
+      { id: "82-3C", page: 82, num: "3-C", type: "practice", jp: "あなたが試合に負けて驚いています。", en: "I'm surprised that you lost the match.", hint: "surprised", blankTarget: "I'm surprised that you lost the match", targetWord: "surprised" },
+
+      // Page 83
+      { id: "83-1A", page: 83, num: "1-A", type: "basic", jp: "リナはピーターに何時なのか尋ねた。", en: "Rina asked Peter what time it was.", hint: "", blankTarget: "Rina asked Peter what time it was", targetWord: "asked" },
+      { id: "83-1B", page: 83, num: "1-B", type: "practice", jp: "リナはピーターに誕生日はいつのなのか尋ねた。", en: "Rina asked Peter when his birthday was.", hint: "when / his birthday", blankTarget: "when his birthday was", targetWord: "birthday" },
+      { id: "83-1C", page: 83, num: "1-C", type: "practice", jp: "リナはピーターにどうやって日本語を勉強したのか尋ねた。", en: "Rina asked Peter how he learned Japanese.", hint: "how / learn", blankTarget: "how he learned Japanese", targetWord: "learned" },
+      { id: "83-2A", page: 83, num: "2-A", type: "basic", jp: "彼女がどこに住んでいるのか知らない。", en: "I don't know where she lives.", hint: "", blankTarget: "I don't know where she lives", targetWord: "where" },
+      { id: "83-2B", page: 83, num: "2-B", type: "practice", jp: "彼女がいつ来るのか知らない。", en: "I don't know when she will come.", hint: "when / will come", blankTarget: "when she will come", targetWord: "when" },
+      { id: "83-2C", page: 83, num: "2-C", type: "practice", jp: "彼女が何を好きなのか知らない。", en: "I don't know what she likes.", hint: "what / like", blankTarget: "what she likes", targetWord: "what" },
+      { id: "83-3A", page: 83, num: "3-A", type: "basic", jp: "このプログラムを誰が書いたか知っていますか。", en: "Do you know who wrote this program?", hint: "", blankTarget: "Do you know who wrote this program?", targetWord: "wrote" },
+      { id: "83-3B", page: 83, num: "3-B", type: "practice", jp: "この機械を誰が組み立てたか知っていますか。", en: "Do you know who assembled this machine?", hint: "assemble / this machine", blankTarget: "who assembled this machine", targetWord: "assembled" },
+      { id: "83-3C", page: 83, num: "3-C", type: "practice", jp: "この手法を誰が開発したか知っていますか。", en: "Do you know who developed this method?", hint: "develop / this method", blankTarget: "who developed this method", targetWord: "developed" },
+
+      // Page 88
+      { id: "88-1A", page: 88, num: "1-A", type: "basic", jp: "毎日の飲酒は健康に良くない。", en: "Drinking every day is harmful for your health.", hint: "", blankTarget: "Drinking every day is harmful for your health", targetWord: "harmful" },
+      { id: "88-1B", page: 88, num: "1-B", type: "practice", jp: "食べ過ぎは健康に良くない。", en: "Eating too much is harmful for your health.", hint: "too much", blankTarget: "Eating too much", targetWord: "Eating" },
+      { id: "88-1C", page: 88, num: "1-C", type: "practice", jp: "毎日のジョギングは健康に良い。", en: "Jogging every day is good for your health.", hint: "good", blankTarget: "Jogging every day is good for your health", targetWord: "Jogging" },
+      { id: "88-2A", page: 88, num: "2-A", type: "basic", jp: "私たちは公園でジョギングを楽しむ。", en: "We enjoy jogging in the park.", hint: "", blankTarget: "We enjoy jogging in the park", targetWord: "enjoy" },
+      { id: "88-2B", page: 88, num: "2-B", type: "practice", jp: "私たちは英語の雑誌を読むのを楽しむ。", en: "We enjoy reading English magazines.", hint: "magazines", blankTarget: "enjoy reading English magazines", targetWord: "magazines" },
+      { id: "88-2C", page: 88, num: "2-C", type: "practice", jp: "私たちはカラオケで歌うのを楽しんでいない。", en: "We don't enjoy singing karaoke.", hint: "sing / karaoke", blankTarget: "don't enjoy singing karaoke", targetWord: "singing" },
+      { id: "88-3A", page: 88, num: "3-A", type: "basic", jp: "われわれの仕事は靴を作ることだ。", en: "Our business is making shoes.", hint: "", blankTarget: "Our business is making shoes", targetWord: "making" },
+      { id: "88-3B", page: 88, num: "3-B", type: "practice", jp: "私の仕事は公園を清掃することです。", en: "My job is cleaning the park.", hint: "clean", blankTarget: "is cleaning the park", targetWord: "cleaning" },
+      { id: "88-3C", page: 88, num: "3-C", type: "practice", jp: "私の仕事は映画を作ることだ。", en: "My job is making movies.", hint: "movies", blankTarget: "is making movies", targetWord: "movies" },
+
+      // Page 89
+      { id: "89-1A", page: 89, num: "1-A", type: "basic", jp: "私はタバコをやめた。", en: "I stopped smoking.", hint: "", blankTarget: "I stopped smoking", targetWord: "stopped" },
+      { id: "89-1B", page: 89, num: "1-B", type: "practice", jp: "私は過去について考えるのをやめた。", en: "I stopped thinking about the past.", hint: "the past", blankTarget: "stopped thinking about the past", targetWord: "thinking" },
+      { id: "89-1C", page: 89, num: "1-C", type: "practice", jp: "私は暴飲暴食をやめた。", en: "I stopped eating and drinking too much.", hint: "too much", blankTarget: "stopped eating and drinking too much", targetWord: "drinking" },
+      { id: "89-2A", page: 89, num: "2-A", type: "basic", jp: "私は公園でジョギングするのが好きだ。", en: "I like jogging in the park.", hint: "", blankTarget: "I like jogging in the park", targetWord: "jogging" },
+      { id: "89-2B", page: 89, num: "2-B", type: "practice", jp: "私は一人で映画を見るのが好きだ。", en: "I like watching movies alone.", hint: "alone", blankTarget: "like watching movies alone", targetWord: "alone" },
+      { id: "89-2C", page: 89, num: "2-C", type: "practice", jp: "私は飲み食いが好きだ。", en: "I like eating and drinking.", hint: "like", blankTarget: "like eating and drinking", targetWord: "eating" },
+      { id: "89-3A", page: 89, num: "3-A", type: "basic", jp: "彼が試験に合格する可能性は高い。", en: "There is a high possibility of his passing the exam.", hint: "", blankTarget: "There is a high possibility of his passing the exam", targetWord: "possibility" },
+      { id: "89-3B", page: 89, num: "3-B", type: "practice", jp: "君が試合に勝つ可能性は高い。", en: "There is a high possibility of your winning the match.", hint: "win the match", blankTarget: "high possibility of your winning the match", targetWord: "winning" },
+      { id: "89-3C", page: 89, num: "3-C", type: "practice", jp: "私たちが試合に勝つ可能性は低い。", en: "There is a low possibility of our winning the match.", hint: "low", blankTarget: "low possibility of our winning the match", targetWord: "low" }
+    ];
+
+    // Target Page List (8 Selected Pages)
+    const PAGE_LIST = [70, 71, 76, 77, 82, 83, 88, 89];
+
+    // Helper: Normalize strings for flexible comparison
+    const normalizeStr = (str) => {
+      if (!str) return "";
+      return str
+        .toLowerCase()
+        .replace(/[.,?!'"]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    };
+
+    // Helper: Speech synthesis
+    const speakText = (text, rate = 1.0) => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = rate;
+        
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha')));
+        if (preferredVoice) utterance.voice = preferredVoice;
+
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
+    // Small original dog illustrations; the palette and ears vary by question.
+    function DogSticker({ seed = 0, size = 76 }) {
+      const palettes = [
+        ['#f6c77a','#8a542e','#fff1d6'], ['#e7edf6','#52627a','#ffffff'], ['#d98b55','#71391f','#ffe0ae'],
+        ['#bd8b68','#5b3c2a','#f5dfc4'], ['#f4e6c8','#b8844d','#fff8e9'], ['#9b6b4d','#563521','#e9c3a0'],
+        ['#d8aa72','#79502e','#fff0d3'], ['#e9b6a0','#925a4b','#ffe7da']
+      ];
+      const [coat, ear, muzzle] = palettes[Math.abs(seed) % palettes.length];
+      const floppy = seed % 2 === 0;
+      return <svg role="img" aria-label="かわいい犬のイラスト" width={size} height={size} viewBox="0 0 100 100" className="shrink-0 drop-shadow-lg" style={{ transform: `rotate(${(seed % 7) - 3}deg)` }}>
+        <circle cx="50" cy="51" r="46" fill={['#dbeafe','#fef3c7','#dcfce7','#fce7f3','#ede9fe'][Math.abs(seed)%5]} />
+        {floppy ? <><path d="M24 35 Q8 37 15 69 Q22 83 36 65Z" fill={ear}/><path d="M76 35 Q92 37 85 69 Q78 83 64 65Z" fill={ear}/></> : <><path d="M22 48 20 16 Q39 24 42 43Z" fill={ear}/><path d="M78 48 80 16 Q61 24 58 43Z" fill={ear}/></>}
+        <ellipse cx="50" cy="53" rx="32" ry="34" fill={coat}/><ellipse cx="50" cy="65" rx="19" ry="14" fill={muzzle}/>
+        <ellipse cx="39" cy="51" rx="3.4" ry="4.4" fill="#30241f"/><ellipse cx="61" cy="51" rx="3.4" ry="4.4" fill="#30241f"/>
+        <circle cx="38" cy="49" r="1.1" fill="white"/><circle cx="60" cy="49" r="1.1" fill="white"/>
+        <ellipse cx="50" cy="62" rx="5" ry="3.8" fill="#30241f"/><path d="M50 66 Q46 72 41 68 M50 66 Q54 72 59 68" fill="none" stroke="#70433c" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="25" cy="59" r="2.2" fill="#f28b82" opacity=".75"/><circle cx="75" cy="59" r="2.2" fill="#f28b82" opacity=".75"/>
+        {seed % 3 === 0 && <path d="M67 27 Q76 19 82 27 Q76 35 67 27Z" fill="#fb7185"/>}
+        {seed % 3 === 1 && <circle cx="50" cy="22" r="4" fill="#60a5fa"/>}
+        {seed % 3 === 2 && <path d="M43 81 Q50 75 57 81 L55 86 L45 86Z" fill="#fbbf24"/>}
+      </svg>;
+    }
+
+    function useEnterToNext(enabled, next) {
+      useEffect(() => {
+        const onKeyDown = (event) => {
+          if (event.key !== 'Enter' || !enabled || event.isComposing) return;
+          event.preventDefault();
+          next();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+      }, [enabled, next]);
+    }
+
+    // ----------------------------------------------------
+    // Main React Application
+    // ----------------------------------------------------
+    function App() {
+      const [selectedPage, setSelectedPage] = useState("all");
+      const [questionType, setQuestionType] = useState("all");
+      const [currentMode, setCurrentMode] = useState("fill");
+      
+      const [mistakes, setMistakes] = useState(() => {
+        const saved = localStorage.getItem("english_prep_mistakes_8pages");
+        return saved ? JSON.parse(saved) : [];
+      });
+
+      const [mastered, setMastered] = useState(() => {
+        const saved = localStorage.getItem("english_prep_mastered_8pages");
+        return saved ? JSON.parse(saved) : [];
+      });
+
+      const [stats, setStats] = useState(() => {
+        const saved = localStorage.getItem("english_prep_stats_8pages");
+        return saved ? JSON.parse(saved) : { correct: 0, total: 0 };
+      });
+
+      useEffect(() => {
+        localStorage.setItem("english_prep_mistakes_8pages", JSON.stringify(mistakes));
+      }, [mistakes]);
+
+      useEffect(() => {
+        localStorage.setItem("english_prep_mastered_8pages", JSON.stringify(mastered));
+      }, [mastered]);
+
+      useEffect(() => {
+        localStorage.setItem("english_prep_stats_8pages", JSON.stringify(stats));
+      }, [stats]);
+
+      // Filtered questions based on page and category filters
+      const filteredQuestions = useMemo(() => {
+        return QUESTIONS_DATA.filter(q => {
+          const matchPage = selectedPage === "all" || q.page === Number(selectedPage);
+          const matchType = questionType === "all" || q.type === questionType;
+          return matchPage && matchType;
+        });
+      }, [selectedPage, questionType]);
+
+      const addMistake = (qId) => {
+        if (!mistakes.includes(qId)) {
+          setMistakes(prev => [...prev, qId]);
+        }
+      };
+
+      const removeMistake = (qId) => {
+        setMistakes(prev => prev.filter(id => id !== qId));
+      };
+
+      const toggleMastered = (qId) => {
+        if (mastered.includes(qId)) {
+          setMastered(prev => prev.filter(id => id !== qId));
+        } else {
+          setMastered(prev => [...prev, qId]);
+        }
+      };
+
+      const recordResult = (isCorrect) => {
+        setStats(prev => ({
+          correct: prev.correct + (isCorrect ? 1 : 0),
+          total: prev.total + 1
+        }));
+      };
+
+      return (
+        <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-3 sm:p-6">
+          {/* Header */}
+          <header className="bg-slate-800/80 backdrop-blur border border-slate-700/80 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-md tracking-wide uppercase">
+                    LET'S TRY
+                  </span>
+                  <span className="text-slate-400 text-xs font-semibold">
+                    指定8ページ限定 テスト対策WEBマスター
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-white mt-1 tracking-tight">
+                  英語定期テスト対策マスター (全72問)
+                </h1>
+                <p className="text-slate-400 text-sm mt-1">
+                  対象8ページ (P.70, 71, 76, 77, 82, 83, 88, 89) 徹底特訓！
+                </p>
+                <p className="text-xs text-indigo-200 mt-1">回答したあと Enter キーで次の問題へ</p>
+                <div className="flex flex-wrap items-center gap-1 mt-3" aria-label="犬のイラストたち">
+                  {[2, 3, 4, 5, 6, 7].map(seed => <DogSticker key={seed} seed={seed} size={48} />)}
+                  <span className="text-amber-200 text-xs font-bold ml-2">今日のわんこ応援団！</span>
+                </div>
+              </div>
+
+              {/* Statistics */}
+              <div className="flex items-center gap-2 bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 self-start md:self-auto text-xs sm:text-sm">
+                <div className="px-3 py-1 text-center border-r border-slate-700">
+                  <div className="text-slate-400 text-xs">正答率</div>
+                  <div className="text-emerald-400 font-extrabold text-base">
+                    {stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0}%
+                  </div>
+                </div>
+                <div className="px-3 py-1 text-center border-r border-slate-700">
+                  <div className="text-slate-400 text-xs">復習リスト</div>
+                  <div className="text-amber-400 font-extrabold text-base">
+                    {mistakes.length}件
+                  </div>
+                </div>
+                <div className="px-3 py-1 text-center">
+                  <div className="text-slate-400 text-xs">マスター</div>
+                  <div className="text-indigo-400 font-extrabold text-base">
+                    {mastered.length}/72
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation & Filters */}
+            <div className="mt-6 pt-5 border-t border-slate-700/60 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              {/* Page Selector Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                <span className="text-slate-400 text-xs font-bold whitespace-nowrap mr-1">
+                  <i className="fa-solid fa-book mr-1"></i>対象ページ:
+                </span>
+                <button
+                  onClick={() => setSelectedPage("all")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
+                    selectedPage === "all"
+                      ? "bg-indigo-600 text-white shadow"
+                      : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"
+                  }`}
+                >
+                  全8ページ (72問)
+                </button>
+                {PAGE_LIST.map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setSelectedPage(p.toString())}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
+                      selectedPage === p.toString()
+                        ? "bg-indigo-600 text-white shadow"
+                        : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"
+                    }`}
+                  >
+                    P.{p}
+                  </button>
+                ))}
+              </div>
+
+              {/* Category Filter */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-slate-400 text-xs font-bold whitespace-nowrap">
+                  <i className="fa-solid fa-filter mr-1"></i>分類:
+                </span>
+                <button
+                  onClick={() => setQuestionType("all")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition ${
+                    questionType === "all" ? "bg-slate-200 text-slate-900" : "bg-slate-700/50 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  すべて
+                </button>
+                <button
+                  onClick={() => setQuestionType("basic")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition ${
+                    questionType === "basic" ? "bg-emerald-500 text-slate-950 font-bold" : "bg-slate-700/50 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  基本文 (1-A~3-A)
+                </button>
+                <button
+                  onClick={() => setQuestionType("practice")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition ${
+                    questionType === "practice" ? "bg-sky-500 text-slate-950 font-bold" : "bg-slate-700/50 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  英訳演習 (B/C)
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Practice Mode Navigation */}
+          <nav className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-6">
+            <button
+              onClick={() => setCurrentMode("fill")}
+              className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
+                currentMode === "fill"
+                  ? "bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-600/30"
+                  : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"
+              }`}
+            >
+              <i className="fa-solid fa-pen-to-square text-indigo-300"></i>
+              穴埋め
+            </button>
+
+            <button
+              onClick={() => setCurrentMode("ordering")}
+              className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
+                currentMode === "ordering"
+                  ? "bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-600/30"
+                  : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"
+              }`}
+            >
+              <i className="fa-solid fa-arrow-down-short-wide text-indigo-300"></i>
+              並べ替え
+            </button>
+
+            <button
+              onClick={() => setCurrentMode("position")}
+              className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
+                currentMode === "position"
+                  ? "bg-teal-600 border-teal-400 text-white shadow-lg shadow-teal-600/30"
+                  : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"
+              }`}
+            >
+              <i className="fa-solid fa-list-ol text-teal-300"></i>
+              語順位置当て
+            </button>
+
+            <button
+              onClick={() => setCurrentMode("error")}
+              className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
+                currentMode === "error"
+                  ? "bg-rose-600 border-rose-400 text-white shadow-lg shadow-rose-600/30"
+                  : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"
+              }`}
+            >
+              <i className="fa-solid fa-bug text-rose-300"></i>
+              誤り指摘
+            </button>
+
+            <button
+              onClick={() => setCurrentMode("random")}
+              className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
+                currentMode === "random"
+                  ? "bg-purple-600 border-purple-400 text-white shadow-lg shadow-purple-600/30"
+                  : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"
+              }`}
+            >
+              <i className="fa-solid fa-dice text-purple-300"></i>
+              ランダム
+            </button>
+
+            <button
+              onClick={() => setCurrentMode("mistakes")}
+              className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border relative ${
+                currentMode === "mistakes"
+                  ? "bg-amber-600 border-amber-400 text-white shadow-lg shadow-amber-600/30"
+                  : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"
+              }`}
+            >
+              <i className="fa-solid fa-rotate-left text-amber-300"></i>
+              間違え直し
+              {mistakes.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-amber-500 text-slate-950 font-black rounded-full">
+                  {mistakes.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setCurrentMode("flashcards")}
+              className={`p-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition border ${
+                currentMode === "flashcards"
+                  ? "bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-600/30"
+                  : "bg-slate-800/90 border-slate-700/80 text-slate-300 hover:bg-slate-700/80"
+              }`}
+            >
+              <i className="fa-solid fa-volume-high text-emerald-300"></i>
+              暗記 (音声)
+            </button>
+          </nav>
+
+          {/* Mode Area */}
+          <main className="flex-1 flex flex-col">
+            {currentMode === "fill" && (
+              <FillInMode
+                questions={filteredQuestions}
+                addMistake={addMistake}
+                removeMistake={removeMistake}
+                recordResult={recordResult}
+              />
+            )}
+
+            {currentMode === "ordering" && (
+              <WordOrderingMode
+                questions={filteredQuestions}
+                addMistake={addMistake}
+                removeMistake={removeMistake}
+                recordResult={recordResult}
+              />
+            )}
+
+            {currentMode === "position" && (
+              <WordPositionMode
+                questions={filteredQuestions}
+                addMistake={addMistake}
+                removeMistake={removeMistake}
+                recordResult={recordResult}
+              />
+            )}
+
+            {currentMode === "error" && (
+              <ErrorSpottingMode
+                questions={filteredQuestions}
+                addMistake={addMistake}
+                removeMistake={removeMistake}
+                recordResult={recordResult}
+              />
+            )}
+
+            {currentMode === "random" && (
+              <RandomQuizMode
+                questions={filteredQuestions}
+                addMistake={addMistake}
+                removeMistake={removeMistake}
+                recordResult={recordResult}
+              />
+            )}
+
+            {currentMode === "mistakes" && (
+              <MistakeReviewMode
+                allQuestions={QUESTIONS_DATA}
+                mistakeIds={mistakes}
+                removeMistake={removeMistake}
+                clearAllMistakes={() => setMistakes([])}
+                recordResult={recordResult}
+              />
+            )}
+
+            {currentMode === "flashcards" && (
+              <FlashcardMode
+                questions={filteredQuestions}
+                mastered={mastered}
+                toggleMastered={toggleMastered}
+              />
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    // ----------------------------------------------------
+    // Mode 1: Fill-In (Phrase & 1-Word Fill)
+    // ----------------------------------------------------
+    function FillInMode({ questions, addMistake, removeMistake, recordResult }) {
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [fillType, setFillType] = useState("phrase");
+      const [userAnswers, setUserAnswers] = useState({});
+      const [feedback, setFeedback] = useState({});
+      const [showHint, setShowHint] = useState(false);
+      const [isRandomOrder, setIsRandomOrder] = useState(false);
+      const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+      useEffect(() => {
+        if (isRandomOrder) {
+          setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
+        } else {
+          setShuffledQuestions(questions);
+        }
+        setCurrentIndex(0);
+      }, [questions, isRandomOrder]);
+
+      const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
+
+      if (!activeQuestions || activeQuestions.length === 0) {
+        return (
+          <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-12 text-center text-slate-400">
+            <i className="fa-solid fa-filter-circle-xmark text-4xl mb-3 text-slate-500"></i>
+            <p className="font-semibold">該当する問題がありません。フィルターを変更してください。</p>
+          </div>
+        );
+      }
+
+      const q = activeQuestions[currentIndex] || activeQuestions[0];
+      const answerKey = `${q.id}-${fillType}`;
+      const isAnswered = feedback[answerKey] !== undefined;
+      const result = feedback[answerKey];
+
+      const targetWord = q.targetWord || q.hint?.split('/')[0]?.trim() || "is";
+      const maskedSentence = useMemo(() => {
+        if (!q.en || !targetWord) return q.en;
+        const regex = new RegExp(`\\b${targetWord}\\b`, "i");
+        return q.en.replace(regex, "[ _____ ]");
+      }, [q, targetWord]);
+
+      const handleCheck = (e) => {
+        if (e) e.preventDefault();
+        const input = (userAnswers[answerKey] || "").trim();
+        if (!input) return;
+
+        let isCorrect = false;
+
+        if (fillType === "oneWord") {
+          isCorrect = normalizeStr(input) === normalizeStr(targetWord);
+        } else {
+          isCorrect = 
+            normalizeStr(input) === normalizeStr(q.en) ||
+            (q.blankTarget && normalizeStr(input) === normalizeStr(q.blankTarget));
+        }
+
+        setFeedback(prev => ({ ...prev, [answerKey]: isCorrect }));
+        recordResult(isCorrect);
+
+        if (!isCorrect) {
+          addMistake(q.id);
+        } else {
+          removeMistake(q.id);
+          speakText(q.en);
+        }
+      };
+
+      const handleNext = () => {
+        setShowHint(false);
+        if (currentIndex < activeQuestions.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        }
+      };
+
+      useEnterToNext(isAnswered, handleNext);
+
+      const handlePrev = () => {
+        setShowHint(false);
+        if (currentIndex > 0) {
+          setCurrentIndex(prev => prev - 1);
+        }
+      };
+
+      return (
+        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 sm:p-8 shadow-xl flex flex-col justify-between flex-1">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-700/60 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="bg-slate-700 text-indigo-300 font-bold text-xs px-3 py-1 rounded-md">
+                  P.{q.page} - {q.num}
+                </span>
+                <span className={`text-xs px-2.5 py-1 rounded-md font-bold uppercase ${
+                  q.type === 'basic' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-sky-950 text-sky-400 border border-sky-800'
+                }`}>
+                  {q.type === 'basic' ? '基本文' : '英訳演習'}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                <button
+                  onClick={() => setIsRandomOrder(!isRandomOrder)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border ${
+                    isRandomOrder
+                      ? "bg-purple-600 border-purple-400 text-white shadow"
+                      : "bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <i className="fa-solid fa-shuffle"></i>
+                  {isRandomOrder ? "出題順: ランダム" : "出題順: 順番通り"}
+                </button>
+
+                <div className="flex items-center bg-slate-900 rounded-xl p-1 border border-slate-700 text-xs font-bold">
+                  <button
+                    onClick={() => setFillType("phrase")}
+                    className={`px-3 py-1.5 rounded-lg transition ${
+                      fillType === "phrase"
+                        ? "bg-indigo-600 text-white shadow"
+                        : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    📝 フレーズ・全文穴埋め
+                  </button>
+                  <button
+                    onClick={() => setFillType("oneWord")}
+                    className={`px-3 py-1.5 rounded-lg transition ${
+                      fillType === "oneWord"
+                        ? "bg-indigo-600 text-white shadow"
+                        : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    🔤 1単語穴埋め
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">日本語訳</div>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+
+              {fillType === "oneWord" && (
+                <div className="p-4 bg-slate-900 border border-slate-700/80 rounded-xl">
+                  <div className="text-xs font-bold text-indigo-400 mb-1">虫食い英文:</div>
+                  <p className="text-lg sm:text-xl font-bold font-mono text-slate-200">
+                    {maskedSentence}
+                  </p>
+                </div>
+              )}
+
+              {fillType === "phrase" && q.hint && (
+                <div className="flex items-center gap-2">
+                  <span className="bg-slate-900/90 text-amber-300 border border-amber-500/30 font-mono text-sm px-3 py-1.5 rounded-lg">
+                    指定語句: [{q.hint}]
+                  </span>
+                  {!showHint && (
+                    <button
+                      onClick={() => setShowHint(true)}
+                      className="text-xs text-slate-400 hover:text-slate-200 underline"
+                    >
+                      ヒントを表示
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {fillType === "phrase" && showHint && q.blankTarget && (
+                <div className="p-3 bg-amber-950/40 border border-amber-500/30 text-amber-200 text-xs sm:text-sm rounded-xl">
+                  💡 指定部分フレーズ: <span className="font-mono font-bold text-amber-300">{q.blankTarget}</span>
+                </div>
+              )}
+            </div>
+
+            <form onSubmit={handleCheck} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-400 mb-2">
+                  {fillType === "oneWord"
+                    ? `空欄 [ _____ ] に当てはまる1単語を半角英語で入力してください:`
+                    : `英語を入力してください（全文またはキーフレーズに対応）:`}
+                </label>
+                <input
+                  type="text"
+                  value={userAnswers[answerKey] || ""}
+                  onChange={(e) => setUserAnswers({ ...userAnswers, [answerKey]: e.target.value })}
+                  placeholder={fillType === "oneWord" ? "例: because" : "英文または語句を入力..."}
+                  disabled={isAnswered}
+                  className="w-full bg-slate-900 border-2 border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-3.5 text-base sm:text-lg text-white placeholder-slate-500 outline-none transition"
+                  autoFocus
+                />
+              </div>
+
+              {!isAnswered && (
+                <button
+                  type="submit"
+                  disabled={!(userAnswers[answerKey] || "").trim()}
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 text-base"
+                >
+                  <i className="fa-solid fa-check"></i> 判定する
+                </button>
+              )}
+            </form>
+
+            {isAnswered && (
+              <div className={`mt-6 p-5 rounded-xl border ${
+                result ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-200" : "bg-rose-950/60 border-rose-500/50 text-rose-200"
+              }`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 font-bold text-lg">
+                    {result ? (
+                      <>
+                        <i className="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
+                        <span className="text-emerald-400">正解です！ Great job!</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-circle-xmark text-rose-400 text-xl"></i>
+                        <span className="text-rose-400">不正解... もう一度確認！</span>
+                      </>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => speakText(q.en)}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition border border-slate-600"
+                  >
+                    <i className="fa-solid fa-volume-high text-indigo-400"></i> 音声再生
+                  </button>
+                </div>
+
+                <div className="space-y-2 text-sm sm:text-base">
+                  {fillType === "oneWord" && (
+                    <div>
+                      <span className="text-slate-400 text-xs font-bold block">空欄の正解単語:</span>
+                      <p className="font-bold text-amber-300 font-mono text-xl">{targetWord}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-slate-400 text-xs font-bold block">全文英文:</span>
+                    <p className="font-bold text-white font-mono text-base sm:text-lg">{q.en}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between mt-8 pt-4 border-t border-slate-700/60">
+            <button
+              onClick={handlePrev}
+              disabled={currentIndex === 0}
+              className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-slate-200 font-bold rounded-xl text-sm transition"
+            >
+              <i className="fa-solid fa-arrow-left"></i> 前へ
+            </button>
+
+            <span className="text-xs text-slate-400 font-bold">
+              {currentIndex + 1} / {activeQuestions.length}
+            </span>
+
+            <button
+              onClick={handleNext}
+              disabled={currentIndex === activeQuestions.length - 1}
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold rounded-xl text-sm transition shadow-md shadow-indigo-600/20"
+            >
+              次へ <i className="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ----------------------------------------------------
+    // Mode 2: Word Ordering
+    // ----------------------------------------------------
+    function WordOrderingMode({ questions, addMistake, removeMistake, recordResult }) {
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [selectedChips, setSelectedChips] = useState([]);
+      const [availableChips, setAvailableChips] = useState([]);
+      const [isChecked, setIsChecked] = useState(false);
+      const [isCorrect, setIsCorrect] = useState(false);
+      const [isRandomOrder, setIsRandomOrder] = useState(false);
+      const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+      useEffect(() => {
+        if (isRandomOrder) {
+          setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
+        } else {
+          setShuffledQuestions(questions);
+        }
+        setCurrentIndex(0);
+      }, [questions, isRandomOrder]);
+
+      const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
+      const q = activeQuestions[currentIndex];
+
+      useEffect(() => {
+        if (!q) return;
+        setIsChecked(false);
+        setIsCorrect(false);
+        setSelectedChips([]);
+
+        const words = q.en.split(/\s+/).map((word, idx) => ({
+          id: `${idx}-${word}`,
+          text: word
+        }));
+
+        const shuffled = [...words].sort(() => Math.random() - 0.5);
+        setAvailableChips(shuffled);
+      }, [q, currentIndex]);
+
+      if (!activeQuestions || activeQuestions.length === 0) {
+        return (
+          <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-12 text-center text-slate-400">
+            <p>該当する問題がありません。</p>
+          </div>
+        );
+      }
+
+      const handleAddChip = (chip) => {
+        if (isChecked) return;
+        setAvailableChips(prev => prev.filter(c => c.id !== chip.id));
+        setSelectedChips(prev => [...prev, chip]);
+      };
+
+      const handleRemoveChip = (chip) => {
+        if (isChecked) return;
+        setSelectedChips(prev => prev.filter(c => c.id !== chip.id));
+        setAvailableChips(prev => [...prev, chip]);
+      };
+
+      const handleReset = () => {
+        if (isChecked || !q) return;
+        const words = q.en.split(/\s+/).map((word, idx) => ({ id: `${idx}-${word}`, text: word }));
+        setSelectedChips([]);
+        setAvailableChips(words.sort(() => Math.random() - 0.5));
+      };
+
+      const handleCheck = () => {
+        if (selectedChips.length === 0) return;
+        const userSentence = selectedChips.map(c => c.text).join(" ");
+        const correct = normalizeStr(userSentence) === normalizeStr(q.en);
+
+        setIsChecked(true);
+        setIsCorrect(correct);
+        recordResult(correct);
+
+        if (!correct) {
+          addMistake(q.id);
+        } else {
+          removeMistake(q.id);
+          speakText(q.en);
+        }
+      };
+
+      const handleNext = () => {
+        if (currentIndex < activeQuestions.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        }
+      };
+
+      useEnterToNext(isChecked, handleNext);
+
+      const handlePrev = () => {
+        if (currentIndex > 0) {
+          setCurrentIndex(prev => prev - 1);
+        }
+      };
+
+      return (
+        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 sm:p-8 shadow-xl flex flex-col justify-between flex-1">
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-700/60 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="bg-slate-700 text-indigo-300 font-bold text-xs px-3 py-1 rounded-md">
+                  P.{q.page} - {q.num}
+                </span>
+                <span className="text-xs font-bold text-amber-400 bg-amber-950/60 border border-amber-800 px-2.5 py-1 rounded-md">
+                  語句並べ替え
+                </span>
+                <button
+                  onClick={() => setIsRandomOrder(!isRandomOrder)}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1.5 border ${
+                    isRandomOrder
+                      ? "bg-purple-600 border-purple-400 text-white shadow"
+                      : "bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <i className="fa-solid fa-shuffle"></i>
+                  {isRandomOrder ? "出題順: ランダム" : "出題順: 順番通り"}
+                </button>
+              </div>
+              <span className="text-slate-400 text-sm font-semibold">
+                問題 {currentIndex + 1} / {activeQuestions.length}
+              </span>
+            </div>
+
+            <div className="mb-6">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">日本語訳</span>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+              {q.hint && (
+                <div className="mt-2 text-xs font-mono text-amber-300">
+                  指定語句: [{q.hint}]
+                </div>
+              )}
+            </div>
+
+            <div className="mb-6">
+              <div className="text-xs font-bold text-slate-400 mb-2 flex items-center justify-between">
+                <span>作成英文:</span>
+                <button
+                  onClick={handleReset}
+                  disabled={isChecked || selectedChips.length === 0}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-40 flex items-center gap-1"
+                >
+                  <i className="fa-solid fa-rotate"></i> リセット
+                </button>
+              </div>
+
+              <div className="min-h-[90px] p-4 bg-slate-900 border-2 border-dashed border-slate-700 rounded-2xl flex flex-wrap gap-2 items-center">
+                {selectedChips.length === 0 ? (
+                  <span className="text-slate-500 text-sm italic">
+                    下の単語カードをタップして正しい順番に並べてください
+                  </span>
+                ) : (
+                  selectedChips.map(chip => (
+                    <button
+                      key={chip.id}
+                      onClick={() => handleRemoveChip(chip)}
+                      disabled={isChecked}
+                      className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base rounded-xl shadow transition transform active:scale-95"
+                    >
+                      {chip.text}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <div className="text-xs font-bold text-slate-400 mb-2">単語リスト:</div>
+              <div className="flex flex-wrap gap-2 min-h-[60px] p-2">
+                {availableChips.map(chip => (
+                  <button
+                    key={chip.id}
+                    onClick={() => handleAddChip(chip)}
+                    disabled={isChecked}
+                    className="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 font-bold text-base rounded-xl border border-slate-600 shadow-sm transition transform active:scale-95"
+                  >
+                    {chip.text}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {!isChecked && (
+              <button
+                onClick={handleCheck}
+                disabled={selectedChips.length === 0}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 text-base"
+              >
+                <i className="fa-solid fa-circle-check"></i> 並べ替えをチェック
+              </button>
+            )}
+
+            {isChecked && (
+              <div className={`p-5 rounded-xl border ${
+                isCorrect ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-200" : "bg-rose-950/60 border-rose-500/50 text-rose-200"
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-bold text-lg flex items-center gap-2">
+                    {isCorrect ? (
+                      <>
+                        <i className="fa-solid fa-circle-check text-emerald-400"></i>
+                        <span className="text-emerald-400">正解です！ Great!</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-circle-xmark text-rose-400"></i>
+                        <span className="text-rose-400">不正解... 正解を確認してください。</span>
+                      </>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => speakText(q.en)}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 border border-slate-600"
+                  >
+                    <i className="fa-solid fa-volume-high text-indigo-400"></i> 音声
+                  </button>
+                </div>
+                <div className="mt-2">
+                  <span className="text-slate-400 text-xs font-bold block">正解英文:</span>
+                  <p className="font-mono font-bold text-white text-lg">{q.en}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between mt-8 pt-4 border-t border-slate-700/60">
+            <button
+              onClick={handlePrev}
+              disabled={currentIndex === 0}
+              className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-slate-200 font-bold rounded-xl text-sm transition"
+            >
+              <i className="fa-solid fa-arrow-left"></i> 前へ
+            </button>
+
+            <span className="text-xs text-slate-400 font-bold">
+              {currentIndex + 1} / {activeQuestions.length}
+            </span>
+
+            <button
+              onClick={handleNext}
+              disabled={currentIndex === activeQuestions.length - 1}
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold rounded-xl text-sm transition"
+            >
+              次へ <i className="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ----------------------------------------------------
+    // Mode 3: Word Position Quiz Mode
+    // ----------------------------------------------------
+    function WordPositionMode({ questions, addMistake, removeMistake, recordResult }) {
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [selectedOption, setSelectedOption] = useState(null);
+      const [isChecked, setIsChecked] = useState(false);
+      const [isRandomOrder, setIsRandomOrder] = useState(false);
+      const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+      useEffect(() => {
+        if (isRandomOrder) {
+          setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
+        } else {
+          setShuffledQuestions(questions);
+        }
+        setCurrentIndex(0);
+      }, [questions, isRandomOrder]);
+
+      const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
+      const q = activeQuestions[currentIndex];
+
+      useEffect(() => {
+        setIsChecked(false);
+        setSelectedOption(null);
+      }, [currentIndex, q]);
+
+      if (!activeQuestions || activeQuestions.length === 0 || !q) {
+        return (
+          <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-12 text-center text-slate-400">
+            <p>該当する問題がありません。</p>
+          </div>
+        );
+      }
+
+      const words = q.en.split(/\s+/);
+      const cleanTarget = (q.targetWord || words[0]).replace(/[.,?!'"]/g, "");
+      
+      let correctPos = words.findIndex(w => w.replace(/[.,?!'"]/g, "").toLowerCase() === cleanTarget.toLowerCase()) + 1;
+      if (correctPos === 0) correctPos = 1;
+
+      const options = (() => {
+        const total = words.length;
+        const setPos = new Set([correctPos]);
+        const candidates = [correctPos - 1, correctPos + 1, correctPos + 2, correctPos - 2, 1, 2, 3, 4, 5, total];
+        for (let p of candidates) {
+          if (p >= 1 && p <= total) setPos.add(p);
+          if (setPos.size === 4) break;
+        }
+        let optArr = Array.from(setPos);
+        while (optArr.length < 4 && optArr.length < total) {
+          for (let i = 1; i <= total; i++) {
+            if (!optArr.includes(i)) { optArr.push(i); break; }
+          }
+        }
+        return optArr.sort((a, b) => a - b);
+      })();
+
+      const handleSelectOption = (opt) => {
+        if (isChecked) return;
+        setSelectedOption(opt);
+        setIsChecked(true);
+        const isCorrect = (opt === correctPos);
+        recordResult(isCorrect);
+        if (!isCorrect) {
+          addMistake(q.id);
+        } else {
+          removeMistake(q.id);
+          speakText(q.en);
+        }
+      };
+
+      const handleNext = () => {
+        if (currentIndex < activeQuestions.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        }
+      };
+
+      useEnterToNext(isChecked, handleNext);
+
+      const handlePrev = () => {
+        if (currentIndex > 0) {
+          setCurrentIndex(prev => prev - 1);
+        }
+      };
+
+      return (
+        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 sm:p-8 shadow-xl flex flex-col justify-between flex-1">
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-700/60 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="bg-slate-700 text-indigo-300 font-bold text-xs px-3 py-1 rounded-md">
+                  P.{q.page} - {q.num}
+                </span>
+                <span className="text-xs font-bold text-teal-300 bg-teal-950/80 border border-teal-800 px-2.5 py-1 rounded-md">
+                  語順位置当て
+                </span>
+                <button
+                  onClick={() => setIsRandomOrder(!isRandomOrder)}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1.5 border ${
+                    isRandomOrder
+                      ? "bg-purple-600 border-purple-400 text-white shadow"
+                      : "bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <i className="fa-solid fa-shuffle"></i>
+                  {isRandomOrder ? "出題順: ランダム" : "出題順: 順番通り"}
+                </button>
+              </div>
+              <span className="text-slate-400 text-sm font-semibold">
+                問題 {currentIndex + 1} / {activeQuestions.length}
+              </span>
+            </div>
+
+            <div className="mb-6 space-y-3">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">日本語訳</span>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+
+              <div className="p-4 bg-slate-900/90 border border-teal-500/30 rounded-xl">
+                <p className="text-sm sm:text-base text-slate-200 font-medium">
+                  英文にした際、指定の単語 <span className="font-mono font-black text-amber-300 text-xl mx-1">『{cleanTarget}』</span> は<br className="hidden sm:inline"/>
+                  先頭から数えて<strong className="text-teal-400">何番目</strong>の単語になりますか？
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {options.map((opt) => {
+                let btnStyle = "bg-slate-900 hover:bg-slate-700 text-white border-slate-700";
+                if (isChecked) {
+                  if (opt === correctPos) {
+                    btnStyle = "bg-emerald-900/90 border-emerald-400 text-emerald-200 shadow-lg shadow-emerald-900/50";
+                  } else if (opt === selectedOption) {
+                    btnStyle = "bg-rose-900/90 border-rose-400 text-rose-200";
+                  } else {
+                    btnStyle = "bg-slate-900/40 border-slate-800 text-slate-600 opacity-50";
+                  }
+                }
+                return (
+                  <button
+                    key={opt}
+                    onClick={() => handleSelectOption(opt)}
+                    disabled={isChecked}
+                    className={`p-4 border-2 rounded-xl text-lg sm:text-xl font-bold transition flex items-center justify-center gap-2 ${btnStyle}`}
+                  >
+                    <span>{opt} 番目</span>
+                    {isChecked && opt === correctPos && <i className="fa-solid fa-circle-check text-emerald-400"></i>}
+                    {isChecked && opt === selectedOption && opt !== correctPos && <i className="fa-solid fa-circle-xmark text-rose-400"></i>}
+                  </button>
+                );
+              })}
+            </div>
+
+            {isChecked && (
+              <div className={`p-5 rounded-xl border ${
+                selectedOption === correctPos ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-200" : "bg-rose-950/60 border-rose-500/50 text-rose-200"
+              }`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="font-bold text-lg flex items-center gap-2">
+                    {selectedOption === correctPos ? (
+                      <span className="text-emerald-400"><i className="fa-solid fa-circle-check"></i> 正解！ 正しい位置を見抜けています。</span>
+                    ) : (
+                      <span className="text-rose-400"><i className="fa-solid fa-circle-xmark"></i> 不正解... 正解は {correctPos} 番目です。</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => speakText(q.en)}
+                    className="px-3 py-1 bg-slate-800 text-white text-xs font-bold rounded-lg"
+                  >
+                    <i className="fa-solid fa-volume-high text-teal-300"></i> 音声
+                  </button>
+                </div>
+
+                <div className="mt-2 space-y-2">
+                  <div className="text-xs text-slate-400 font-bold">単語の位置一覧:</div>
+                  <div className="flex flex-wrap gap-1.5 p-3 bg-slate-900/80 rounded-lg text-xs font-mono">
+                    {words.map((w, idx) => {
+                      const pos = idx + 1;
+                      const isTarget = pos === correctPos;
+                      return (
+                        <span
+                          key={idx}
+                          className={`px-2 py-1 rounded border ${
+                            isTarget
+                              ? "bg-amber-400 text-slate-950 border-amber-300 font-extrabold"
+                              : "bg-slate-800 text-slate-300 border-slate-700"
+                          }`}
+                        >
+                          <span className="text-[10px] text-slate-500 mr-1">{pos}.</span>
+                          {w}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between mt-8 pt-4 border-t border-slate-700/60">
+            <button
+              onClick={handlePrev}
+              disabled={currentIndex === 0}
+              className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-slate-200 font-bold rounded-xl text-sm transition"
+            >
+              <i className="fa-solid fa-arrow-left"></i> 前へ
+            </button>
+
+            <span className="text-xs text-slate-400 font-bold">
+              {currentIndex + 1} / {activeQuestions.length}
+            </span>
+
+            <button
+              onClick={handleNext}
+              disabled={currentIndex === activeQuestions.length - 1}
+              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-40 text-white font-bold rounded-xl text-sm transition shadow-md shadow-teal-600/20"
+            >
+              次へ <i className="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ----------------------------------------------------
+    // Mode 4: Underlined phrase multiple-choice practice
+    // ----------------------------------------------------
+    function ErrorSpottingMode({ questions, addMistake, removeMistake, recordResult }) {
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [selectedChoice, setSelectedChoice] = useState(null);
+      const [isChecked, setIsChecked] = useState(false);
+      const [isRandomOrder, setIsRandomOrder] = useState(false);
+      const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+      useEffect(() => {
+        setShuffledQuestions(isRandomOrder ? [...questions].sort(() => Math.random() - 0.5) : questions);
+        setCurrentIndex(0);
+      }, [questions, isRandomOrder]);
+
+      const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
+      const q = activeQuestions[currentIndex];
+      useEffect(() => { setIsChecked(false); setSelectedChoice(null); }, [currentIndex, q]);
+      useEnterToNext(isChecked, () => setCurrentIndex(i => Math.min(i + 1, activeQuestions.length - 1)));
+
+      if (!q) return <div className="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center text-slate-300">該当する問題がありません。</div>;
+
+      const target = q.targetWord || q.en.split(/\s+/)[0].replace(/[.,?!'"]/g, '');
+      const targetPattern = new RegExp(`(${target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'i');
+      const match = q.en.match(targetPattern);
+      const targetText = match ? match[0] : target;
+      const distractors = new Set();
+      if (/^\d+$/.test(targetText)) { const n = Number(targetText); distractors.add(String(n - 1)); distractors.add(String(n + 1)); distractors.add(String(n + 10)); }
+      else if (/ing$/i.test(targetText)) { distractors.add(targetText.replace(/ing$/i, '')); distractors.add(targetText.replace(/ing$/i, 'ed')); distractors.add(targetText.replace(/ing$/i, 's')); }
+      else if (/ed$/i.test(targetText)) { distractors.add(targetText.replace(/ed$/i, '')); distractors.add(targetText.replace(/ed$/i, 'ing')); distractors.add(targetText.replace(/ed$/i, 's')); }
+      else if (/s$/i.test(targetText)) { distractors.add(targetText.replace(/s$/i, '')); distractors.add(targetText + 'ed'); distractors.add(targetText + 'ing'); }
+      else { distractors.add(targetText + 's'); distractors.add(targetText + 'ed'); distractors.add(targetText + 'ing'); }
+      const options = [targetText, ...[...distractors].filter(x => x && x.toLowerCase() !== targetText.toLowerCase()).slice(0, 3)];
+      while (options.length < 4) options.push(targetText + (options.length === 1 ? 'ly' : 'ness'));
+      const shuffledOptions = useMemo(() => {
+        const seed = [...options];
+        // Rotate choices per question so the correct answer does not stay in the same position.
+        const shift = (Number(q.id.split('-')[0]) + q.id.charCodeAt(q.id.length - 1)) % seed.length;
+        return seed.slice(shift).concat(seed.slice(0, shift));
+      }, [q.id, targetText]);
+      const correctIndex = shuffledOptions.findIndex(x => x.toLowerCase() === targetText.toLowerCase());
+      const wrongText = shuffledOptions.find((x, i) => i !== correctIndex) || `${targetText}x`;
+      const labels = ['A', 'B', 'C', 'D'];
+      const choose = (index) => {
+        if (isChecked) return;
+        setSelectedChoice(index); setIsChecked(true);
+        const correct = index === correctIndex;
+        recordResult(correct);
+        if (correct) { removeMistake(q.id); speakText(q.en); } else addMistake(q.id);
+      };
+      const move = (delta) => { setCurrentIndex(i => Math.max(0, Math.min(activeQuestions.length - 1, i + delta))); };
+
+      return (
+        <section className="bg-slate-800/90 border border-slate-600 rounded-2xl p-5 sm:p-8 shadow-xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-600 mb-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="bg-slate-700 text-indigo-200 font-bold text-xs px-3 py-1.5 rounded-lg">P.{q.page}・{q.num}</span>
+              <span className="text-xs font-bold text-rose-200 bg-rose-950 border border-rose-700 px-3 py-1.5 rounded-lg">下線部の訂正</span>
+              <button onClick={() => setIsRandomOrder(v => !v)} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-600 bg-slate-900 text-slate-200 hover:bg-slate-700">{isRandomOrder ? '🔀 ランダム順' : '順番通り'}</button>
+            </div>
+            <span className="text-slate-300 text-sm font-semibold">問題 {currentIndex + 1} / {activeQuestions.length}</span>
+          </div>
+          <div className="mb-6">
+            <div className="text-xs font-bold text-slate-400 mb-2">日本語訳</div>
+            <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-white leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+          </div>
+          <div className="rounded-2xl bg-slate-950 border border-indigo-400/50 p-5 sm:p-7 mb-6">
+            <div className="text-xs font-bold text-rose-300 mb-3">英文（誤りは1か所）</div>
+            <p className="text-lg sm:text-2xl leading-loose font-semibold text-white">{match ? <>{q.en.slice(0, match.index)}<u className="decoration-rose-400 decoration-4 underline-offset-8 text-rose-100">{wrongText}</u>{q.en.slice(match.index + targetText.length)}</> : q.en}</p>
+            <p className="text-sm text-slate-300 mt-4">下線部の誤りを正しく直す選択肢を選びましょう。</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {shuffledOptions.map((option, index) => {
+              const isAnswer = index === correctIndex;
+              const selected = index === selectedChoice;
+              let style = 'bg-slate-900 border-slate-600 text-white hover:border-indigo-400 hover:bg-slate-700';
+              if (isChecked && isAnswer) style = 'bg-emerald-950 border-emerald-400 text-emerald-100';
+              else if (isChecked && selected) style = 'bg-rose-950 border-rose-400 text-rose-100';
+              return <button key={`${option}-${index}`} onClick={() => choose(index)} disabled={isChecked} className={`min-h-14 p-4 border-2 rounded-xl text-left font-semibold text-lg transition flex items-center gap-3 ${style}`}><span className="rounded-lg bg-slate-700 px-3 py-1 text-sm font-black">{labels[index]}</span><span>{option}</span>{isChecked && isAnswer && <i className="fa-solid fa-circle-check ml-auto text-emerald-300"></i>}</button>;
+            })}
+          </div>
+          {isChecked && <div className={`mt-6 p-5 rounded-xl border ${selectedChoice === correctIndex ? 'bg-emerald-950/70 border-emerald-500 text-emerald-100' : 'bg-rose-950/70 border-rose-500 text-rose-100'}`}>
+            <div className="font-bold text-lg mb-2">{selectedChoice === correctIndex ? '正解です！' : `不正解。正解は ${labels[correctIndex]} です。`}</div>
+            <div className="text-sm text-slate-200">正しい英文</div><p className="font-mono text-white text-base sm:text-lg mt-1">{q.en}</p>
+            <button onClick={() => speakText(q.en)} className="mt-3 px-4 py-2 bg-slate-800 rounded-lg text-sm font-bold"><i className="fa-solid fa-volume-high mr-2 text-indigo-300"></i>音声</button>
+          </div>}
+          <div className="flex items-center justify-between mt-7 pt-5 border-t border-slate-600">
+            <button onClick={() => move(-1)} disabled={currentIndex === 0} className="px-4 py-3 rounded-xl bg-slate-700 text-white font-bold disabled:opacity-40">← 前へ</button>
+            <button onClick={() => move(1)} disabled={currentIndex === activeQuestions.length - 1} className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold disabled:opacity-40">次へ →</button>
+          </div>
+        </section>
+      );
+    }
+
+    // ----------------------------------------------------
+    // Mode 5: Random Quiz Challenge
+    // ----------------------------------------------------
+    function RandomQuizMode({ questions, addMistake, removeMistake, recordResult }) {
+      const [quizState, setQuizState] = useState("setup");
+      const [quizCount, setQuizCount] = useState(10);
+      const [quizPool, setQuizPool] = useState([]);
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [userAnswer, setUserAnswer] = useState("");
+      const [results, setResults] = useState([]);
+      const [isAnswered, setIsAnswered] = useState(false);
+
+      const startQuiz = (count) => {
+        if (!questions || questions.length === 0) return;
+        const shuffled = [...questions].sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, Math.min(count, questions.length));
+        setQuizCount(selected.length);
+        setQuizPool(selected);
+        setCurrentIndex(0);
+        setUserAnswer("");
+        setResults([]);
+        setIsAnswered(false);
+        setQuizState("playing");
+      };
+
+      const q = quizPool[currentIndex];
+
+      const handleCheck = (e) => {
+        if (e) e.preventDefault();
+        if (!userAnswer.trim() || !q) return;
+
+        const isCorrect = 
+          normalizeStr(userAnswer) === normalizeStr(q.en) ||
+          (q.blankTarget && normalizeStr(userAnswer) === normalizeStr(q.blankTarget)) ||
+          (q.targetWord && normalizeStr(userAnswer) === normalizeStr(q.targetWord));
+
+        setIsAnswered(true);
+        recordResult(isCorrect);
+
+        const recordItem = { question: q, userAns: userAnswer, isCorrect };
+        setResults(prev => [...prev, recordItem]);
+
+        if (!isCorrect) {
+          addMistake(q.id);
+        } else {
+          removeMistake(q.id);
+          speakText(q.en);
+        }
+      };
+
+      const handleNextQuestion = () => {
+        setIsAnswered(false);
+        setUserAnswer("");
+        if (currentIndex < quizPool.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        } else {
+          setQuizState("summary");
+        }
+      };
+
+      useEnterToNext(isAnswered, handleNextQuestion);
+
+      if (quizState === "setup") {
+        return (
+          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-6 sm:p-12 shadow-xl text-center">
+            <div className="w-16 h-16 bg-purple-950/80 border border-purple-500/30 text-purple-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+              <i className="fa-solid fa-dice"></i>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-2">ランダムテスト・チャレンジ</h2>
+            <p className="text-slate-400 text-sm max-w-lg mx-auto mb-8">
+              選択された問題（{questions.length}問）からランダムでシャッフル出題します。コースを選択してスタート！
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto mb-8">
+              <button
+                onClick={() => startQuiz(10)}
+                disabled={questions.length === 0}
+                className="p-5 bg-slate-900 hover:bg-purple-950/70 border border-slate-700 hover:border-purple-500 rounded-2xl transition group text-left"
+              >
+                <div className="text-purple-400 font-extrabold text-lg mb-1 group-hover:scale-105 transition transform">⚡ 10問コース</div>
+                <div className="text-slate-400 text-xs">サクッと短時間でテスト</div>
+              </button>
+
+              <button
+                onClick={() => startQuiz(20)}
+                disabled={questions.length < 5}
+                className="p-5 bg-slate-900 hover:bg-purple-950/70 border border-slate-700 hover:border-purple-500 rounded-2xl transition group text-left"
+              >
+                <div className="text-purple-400 font-extrabold text-lg mb-1 group-hover:scale-105 transition transform">🔥 20問コース</div>
+                <div className="text-slate-400 text-xs">しっかり実力チェック</div>
+              </button>
+
+              <button
+                onClick={() => startQuiz(questions.length)}
+                disabled={questions.length === 0}
+                className="p-5 bg-slate-900 hover:bg-purple-950/70 border border-slate-700 hover:border-purple-500 rounded-2xl transition group text-left"
+              >
+                <div className="text-purple-400 font-extrabold text-lg mb-1 group-hover:scale-105 transition transform">🏆 全問挑戦 ({questions.length}問)</div>
+                <div className="text-slate-400 text-xs">対象範囲の完全網羅</div>
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (quizState === "summary") {
+        const correctCount = results.filter(r => r.isCorrect).length;
+        const scorePercent = Math.round((correctCount / results.length) * 100);
+
+        let rank = "S";
+        if (scorePercent < 60) rank = "C";
+        else if (scorePercent < 80) rank = "B";
+        else if (scorePercent < 95) rank = "A";
+
+        return (
+          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-6 sm:p-10 shadow-xl text-center">
+            <div className="inline-block px-4 py-1.5 bg-purple-950 text-purple-300 border border-purple-800 rounded-full text-xs font-extrabold mb-4">
+              テスト完了！ RESULT
+            </div>
+
+            <div className="text-5xl font-black text-white mb-2">
+              {scorePercent}<span className="text-2xl text-purple-400">%</span>
+            </div>
+
+            <p className="text-slate-300 text-base font-bold mb-6">
+              正解数: <span className="text-emerald-400 font-extrabold text-xl">{correctCount}</span> / {results.length}問 (ランク <span className="text-amber-400 font-black text-xl">{rank}</span>)
+            </p>
+
+            <div className="max-w-2xl mx-auto bg-slate-900/90 rounded-2xl p-4 sm:p-6 mb-8 text-left border border-slate-700">
+              <h3 className="text-sm font-bold text-slate-300 mb-4 pb-2 border-b border-slate-800">
+                出題結果リスト:
+              </h3>
+              <div className="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-1">
+                {results.map((res, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/80 flex items-center justify-between text-xs sm:text-sm"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400 font-bold">Q{idx + 1}. P.{res.question.page}</span>
+                        <span className={res.isCorrect ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                          {res.isCorrect ? "◯ 正解" : "✕ 不正解"}
+                        </span>
+                      </div>
+                      <div className="text-slate-200 font-semibold">{res.question.jp}</div>
+                      <div className="text-indigo-300 font-mono">{res.question.en}</div>
+                    </div>
+                    <button
+                      onClick={() => speakText(res.question.en)}
+                      className="p-2 bg-slate-700 text-slate-300 rounded-lg hover:text-white shrink-0 ml-2"
+                    >
+                      <i className="fa-solid fa-volume-high"></i>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setQuizState("setup")}
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-base rounded-xl transition shadow-lg shadow-purple-600/30 flex items-center gap-2"
+              >
+                <i className="fa-solid fa-rotate-right"></i> もう一度挑戦
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 sm:p-8 shadow-xl flex flex-col justify-between flex-1">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-slate-700/60 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="bg-purple-950 text-purple-300 border border-purple-800 font-bold text-xs px-3 py-1 rounded-md">
+                  P.{q.page} - {q.num}
+                </span>
+                <span className="text-xs font-bold text-slate-400">
+                  ランダム出題
+                </span>
+              </div>
+              <span className="text-purple-300 text-sm font-extrabold">
+                問題 {currentIndex + 1} / {quizPool.length}
+              </span>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">日本語訳</div>
+              <div className="flex items-center justify-between gap-3"><h2 className="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed">{q.jp}</h2><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} /></div>
+              {q.hint && (
+                <div className="text-xs font-mono text-amber-300">
+                  指定語句: [{q.hint}]
+                </div>
+              )}
+            </div>
+
+            <form onSubmit={handleCheck} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-400 mb-2">
+                  英語を入力してください:
+                </label>
+                <input
+                  type="text"
+                  value={userAnswer}
+                  onChange={(e) => setUserAnswer(e.target.value)}
+                  placeholder="英文またはキー語句を入力..."
+                  disabled={isAnswered}
+                  className="w-full bg-slate-900 border-2 border-slate-700 focus:border-purple-500 rounded-xl px-4 py-3.5 text-base sm:text-lg text-white placeholder-slate-500 outline-none transition"
+                  autoFocus
+                />
+              </div>
+
+              {!isAnswered && (
+                <button
+                  type="submit"
+                  disabled={!userAnswer.trim()}
+                  className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 text-base"
+                >
+                  <i className="fa-solid fa-check"></i> 判定する
+                </button>
+              )}
+            </form>
+
+            {isAnswered && (
+              <div className={`mt-6 p-5 rounded-xl border ${
+                results[results.length - 1]?.isCorrect ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-200" : "bg-rose-950/60 border-rose-500/50 text-rose-200"
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-bold text-lg flex items-center gap-2">
+                    {results[results.length - 1]?.isCorrect ? (
+                      <span className="text-emerald-400">正解！ Perfect!</span>
+                    ) : (
+                      <span className="text-rose-400">不正解... 次で取り返そう！</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => speakText(q.en)}
+                    className="px-3 py-1 bg-slate-800 text-white text-xs font-bold rounded-lg"
+                  >
+                    <i className="fa-solid fa-volume-high text-purple-300"></i> 音声
+                  </button>
+                </div>
+                <div>
+                  <span className="text-slate-400 text-xs font-bold block">正解英文:</span>
+                  <p className="font-mono font-bold text-white text-lg">{q.en}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end mt-8 pt-4 border-t border-slate-700/60">
+            {isAnswered && (
+              <button
+                onClick={handleNextQuestion}
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm sm:text-base rounded-xl transition shadow-lg shadow-purple-600/30 flex items-center gap-2"
+              >
+                {currentIndex < quizPool.length - 1 ? "次の問題へ" : "結果を見る"} <i className="fa-solid fa-arrow-right"></i>
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ----------------------------------------------------
+    // Mode 6: Mistake Review
+    // ----------------------------------------------------
+    function MistakeReviewMode({ allQuestions, mistakeIds, removeMistake, clearAllMistakes, recordResult }) {
+      const mistakeQuestions = useMemo(() => {
+        return allQuestions.filter(q => mistakeIds.includes(q.id));
+      }, [allQuestions, mistakeIds]);
+
+      const [practiceMode, setPracticeMode] = useState(false);
+
+      if (mistakeQuestions.length === 0) {
+        return (
+          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-12 text-center shadow-xl">
+            <div className="w-16 h-16 bg-emerald-950/80 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+              <i className="fa-solid fa-trophy"></i>
+            </div>
+            <h2 className="text-2xl font-black text-white mb-2">素晴らしい！間違いリストは空です</h2>
+            <p className="text-slate-400 text-sm max-w-md mx-auto">
+              テスト演習中に間違えた問題がここに自動蓄積されます。
+            </p>
+          </div>
+        );
+      }
+
+      if (practiceMode) {
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700">
+              <span className="text-amber-400 font-bold text-sm">
+                <i className="fa-solid fa-rotate-left mr-2"></i>復習リストを再テスト中 ({mistakeQuestions.length}問)
+              </span>
+              <button
+                onClick={() => setPracticeMode(false)}
+                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold rounded-lg"
+              >
+                リストへ戻る
+              </button>
+            </div>
+            <FillInMode
+              questions={mistakeQuestions}
+              addMistake={() => {}}
+              removeMistake={removeMistake}
+              recordResult={recordResult}
+            />
+          </div>
+        );
+      }
+
+      return (
+        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 sm:p-8 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-700/60 mb-6">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                <i className="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                間違えた問題リスト ({mistakeQuestions.length}問)
+              </h2>
+              <p className="text-slate-400 text-xs sm:text-sm mt-1">
+                「一括再テスト開始」または個別に復習して苦手問題の克服を目指しましょう。
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPracticeMode(true)}
+                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition shadow-md shadow-indigo-600/30 flex items-center gap-2"
+              >
+                <i className="fa-solid fa-play"></i> 一括再テスト開始
+              </button>
+              <button
+                onClick={clearAllMistakes}
+                className="px-3 py-2.5 bg-slate-700 hover:bg-rose-900/80 hover:text-rose-200 text-slate-300 font-bold text-xs rounded-xl transition border border-slate-600"
+              >
+                リスト消去
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+            {mistakeQuestions.map(q => (
+              <div
+                key={q.id}
+                className="p-4 bg-slate-900/80 border border-slate-700/80 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-600 transition"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-slate-800 text-indigo-300 font-bold text-xs px-2.5 py-0.5 rounded">
+                      P.{q.page} - {q.num}
+                    </span>
+                    {q.hint && (
+                      <span className="text-amber-400 font-mono text-xs">
+                        [{q.hint}]
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3"><div className="text-slate-200 font-bold text-base">{q.jp}</div><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} size={54} /></div>
+                  <div className="text-indigo-300 font-mono font-bold text-sm sm:text-base">{q.en}</div>
+                </div>
+
+                <div className="flex items-center gap-2 self-end md:self-center shrink-0">
+                  <button
+                    onClick={() => speakText(q.en)}
+                    className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm border border-slate-700"
+                    title="音声再生"
+                  >
+                    <i className="fa-solid fa-volume-high text-indigo-400"></i>
+                  </button>
+
+                  <button
+                    onClick={() => removeMistake(q.id)}
+                    className="px-3 py-2 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-xs font-bold rounded-lg flex items-center gap-1.5 transition"
+                  >
+                    <i className="fa-solid fa-check"></i> 克服した
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ----------------------------------------------------
+    // Mode 7: Flashcard Mode (Audio & Flip Cards)
+    // ----------------------------------------------------
+    function FlashcardMode({ questions, mastered, toggleMastered }) {
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [isFlipped, setIsFlipped] = useState(false);
+      const [speechRate, setSpeechRate] = useState(1.0);
+      const [autoPlay, setAutoPlay] = useState(false);
+      const [isRandomOrder, setIsRandomOrder] = useState(false);
+      const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+      useEffect(() => {
+        if (isRandomOrder) {
+          setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
+        } else {
+          setShuffledQuestions(questions);
+        }
+        setCurrentIndex(0);
+      }, [questions, isRandomOrder]);
+
+      const activeQuestions = isRandomOrder ? shuffledQuestions : questions;
+      const q = activeQuestions[currentIndex];
+      useEnterToNext(true, () => setCurrentIndex(i => Math.min(i + 1, activeQuestions.length - 1)));
+
+      useEffect(() => {
+        setIsFlipped(false);
+      }, [currentIndex, q]);
+
+      useEffect(() => {
+        let timer;
+        if (autoPlay && q) {
+          speakText(q.en, speechRate);
+          timer = setTimeout(() => {
+            setIsFlipped(true);
+            timer = setTimeout(() => {
+              if (currentIndex < activeQuestions.length - 1) {
+                setCurrentIndex(prev => prev + 1);
+              } else {
+                setAutoPlay(false);
+              }
+            }, 3000);
+          }, 1500);
+        }
+        return () => clearTimeout(timer);
+      }, [autoPlay, currentIndex, q, speechRate, activeQuestions]);
+
+      if (!activeQuestions || activeQuestions.length === 0 || !q) {
+        return (
+          <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-12 text-center text-slate-400">
+            <p>該当する問題がありません。</p>
+          </div>
+        );
+      }
+
+      const isItemMastered = mastered.includes(q.id);
+
+      const handleNext = () => {
+        if (currentIndex < activeQuestions.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentIndex > 0) {
+          setCurrentIndex(prev => prev - 1);
+        }
+      };
+
+      return (
+        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 sm:p-8 shadow-xl flex flex-col justify-between flex-1">
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-700/60 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold text-xs px-3 py-1 rounded-md">
+                  P.{q.page} - {q.num}
+                </span>
+                <button
+                  onClick={() => setIsRandomOrder(!isRandomOrder)}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1.5 border ${
+                    isRandomOrder
+                      ? "bg-purple-600 border-purple-400 text-white shadow"
+                      : "bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <i className="fa-solid fa-shuffle"></i>
+                  {isRandomOrder ? "出題順: ランダム" : "出題順: 順番通り"}
+                </button>
+              </div>
+
+              {/* Speech Controls */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700 text-xs">
+                  <span className="text-slate-400 font-bold mr-1">速度:</span>
+                  {[0.8, 1.0, 1.2].map(r => (
+                    <button
+                      key={r}
+                      onClick={() => setSpeechRate(r)}
+                      className={`px-2 py-0.5 rounded font-bold transition ${
+                        speechRate === r ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      {r}x
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setAutoPlay(!autoPlay)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border ${
+                    autoPlay
+                      ? "bg-emerald-600 border-emerald-400 text-white shadow"
+                      : "bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <i className={`fa-solid ${autoPlay ? 'fa-pause' : 'fa-play'}`}></i>
+                  {autoPlay ? "自動再生中" : "自動再生"}
+                </button>
+              </div>
+            </div>
+
+            {/* Flip Card Container */}
+            <div
+              onClick={() => setIsFlipped(!isFlipped)}
+              className="card-flip min-h-[260px] cursor-pointer mb-6 group"
+            >
+              <div className={`card-inner relative w-full h-full ${isFlipped ? 'card-flipped' : ''}`}>
+                {/* Front (Japanese) */}
+                <div className="card-front bg-slate-900 border-2 border-slate-700 group-hover:border-slate-500 rounded-2xl p-6 sm:p-10 flex flex-col justify-between shadow-2xl min-h-[260px]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">表面 : 日本語</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleMastered(q.id); }}
+                      className={`text-xl ${isItemMastered ? 'text-amber-400' : 'text-slate-600 hover:text-amber-400'}`}
+                      title="マスターに登録"
+                    >
+                      <i className="fa-solid fa-star"></i>
+                    </button>
+                  </div>
+
+                  <div className="my-auto text-center py-6">
+                    <div className="flex items-center justify-center gap-4"><h3 className="text-xl sm:text-3xl font-extrabold text-white leading-relaxed">{q.jp}</h3><DogSticker seed={q.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)} size={92} /></div>
+                    {q.hint && (
+                      <p className="mt-3 text-xs sm:text-sm font-mono text-amber-300">
+                        ヒント: [{q.hint}]
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="text-center text-xs text-slate-500 font-bold flex items-center justify-center gap-1">
+                    <i className="fa-solid fa-hand-pointer"></i> タップして裏面(英語)を表示
+                  </div>
+                </div>
+
+                {/* Back (English) */}
+                <div className="card-back absolute top-0 left-0 w-full h-full bg-slate-950 border-2 border-emerald-500/50 rounded-2xl p-6 sm:p-10 flex flex-col justify-between shadow-2xl min-h-[260px]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">裏面 : 英語</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); speakText(q.en, speechRate); }}
+                      className="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-700 rounded-lg text-xs font-bold flex items-center gap-1.5"
+                    >
+                      <i className="fa-solid fa-volume-high"></i> 音声
+                    </button>
+                  </div>
+
+                  <div className="my-auto text-center py-6">
+                    <p className="text-xl sm:text-3xl font-mono font-extrabold text-emerald-300 leading-relaxed">
+                      {q.en}
+                    </p>
+                  </div>
+
+                  <div className="text-center text-xs text-slate-500 font-bold">
+                    タップで表面に戻る
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700/60">
+            <button
+              onClick={handlePrev}
+              disabled={currentIndex === 0}
+              className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-slate-200 font-bold rounded-xl text-sm transition"
+            >
+              <i className="fa-solid fa-arrow-left"></i> 前へ
+            </button>
+
+            <button
+              onClick={() => speakText(q.en, speechRate)}
+              className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-700/60 font-bold rounded-xl text-sm transition flex items-center gap-2 shadow"
+            >
+              <i className="fa-solid fa-volume-high"></i> 音声を聞く
+            </button>
+
+            <button
+              onClick={handleNext}
+              disabled={currentIndex === activeQuestions.length - 1}
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold rounded-xl text-sm transition shadow-md shadow-emerald-600/20"
+            >
+              次へ <i className="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Render the React App
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
