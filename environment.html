@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>温室効果と気候変動｜暗記ノート</title>
+<style>
+:root{--ink:#17343b;--muted:#597078;--teal:#087f78;--mint:#e9f8f2;--line:#d9e6e7;--paper:#fff;--bg:#f3f8f7;--gold:#f2b84b;--red:#b43b3b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.7}.wrap{max-width:1060px;margin:auto;padding:28px 20px 64px}.hero{background:linear-gradient(125deg,#0b6f70,#159381);color:white;padding:34px;border-radius:22px;box-shadow:0 12px 32px #0a504022}.eyebrow{font-size:.82rem;letter-spacing:.08em;opacity:.82}.hero h1{font-size:clamp(1.7rem,4vw,2.6rem);line-height:1.3;margin:8px 0}.hero p{margin:0;opacity:.9}.tabs{display:flex;gap:10px;margin:22px 0}.tab,.btn,select{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:white;color:var(--ink);cursor:pointer}.tab.active,.btn.primary,.mode.active{background:var(--teal);border-color:var(--teal);color:#fff}.panel{display:none}.panel.active{display:block}.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:0 4px 18px #17343b08}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.stats{margin-left:auto;color:var(--muted);font-size:.9rem}.progress{height:8px;background:#e8eeee;border-radius:9px;overflow:hidden;margin:12px 0 20px}.progress i{display:block;height:100%;background:var(--gold);width:0;transition:width .2s}.qmeta{color:var(--teal);font-weight:700;font-size:.9rem}.question{font-size:1.28rem;font-weight:750;margin:8px 0 18px}.choices{display:grid;gap:10px}.choice{text-align:left;padding:13px 15px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:inherit;cursor:pointer}.choice:hover{border-color:var(--teal);background:#f4fbf8}.choice.correct{border-color:#2c9b68;background:#e9f8ef}.choice.wrong{border-color:#d65d5d;background:#fff0f0}.choice:disabled{cursor:default}.feedback{margin-top:14px;padding:12px 14px;border-radius:10px;background:#f2f7f7}.feedback.good{background:#e9f8ef}.feedback.bad{background:#fff0f0}.controls{display:flex;justify-content:space-between;gap:10px;margin-top:18px}.hide{display:none}.summary{background:var(--mint);border-radius:12px;padding:16px;margin:14px 0}.filters{margin-bottom:14px}.table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;background:white;min-width:650px}th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#eaf5f2;color:#126d67}tr:last-child td{border:0}.tag{display:inline-block;background:var(--mint);color:#08746d;border-radius:99px;padding:2px 9px;font-size:.8rem}.note{font-size:.88rem;color:var(--muted)}.formula{font-family:Georgia,serif;font-size:1.12rem;color:#08746d;font-weight:bold}.fraction{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.35;font-weight:800;color:#08746d;margin:4px 2px}.fraction .top{padding:0 8px 3px;border-bottom:2px solid #08746d}.fraction .bottom{padding:3px 8px 0}.foot{color:var(--muted);font-size:.82rem;text-align:center;margin-top:25px}@media(max-width:620px){.wrap{padding:16px 12px 42px}.hero{padding:24px 20px}.tabs{display:grid;grid-template-columns:1fr 1fr}.tab{padding:9px 8px}.card{padding:17px}.stats{margin-left:0;width:100%}}
+</style></head>
+<body><main class="wrap"><header class="hero"><div class="eyebrow">TEST PREP · SCIENCE</div><h1>温室効果と気候変動の科学</h1><p>暗記ノート｜4択クイズと要点一覧</p></header>
+<nav class="tabs"><button class="tab active" data-tab="quiz">4択クイズ</button><button class="tab" data-tab="list">暗記用一覧表</button></nav>
+<section id="quiz" class="panel active"><div class="card"><div class="row"><label for="category">出題範囲</label><select id="category"><option value="all">すべて</option></select><span class="stats" id="stats"></span></div><div class="row modes"><button class="btn mode active" data-mode="sequence">順番出題</button><button class="btn mode" data-mode="random">ランダム出題</button><button class="btn mode" data-mode="retry">間違えなおし</button></div><div class="progress"><i id="bar"></i></div><div id="quizArea"></div></div><p class="note">選択すると正誤と解説が表示されます。問題順と選択肢は開始時にシャッフルされます。</p></section>
+<section id="list" class="panel"><div class="card"><h2>要点を一覧で確認</h2><div class="summary"><b>重要：</b>CO₂の増加と地球の平均気温の上昇には明確な相関がある。</div><p class="note">テスト直前に、数値・定義・発生源をまとめて復習できます。</p><div class="filters"><label for="tableCategory">分野で絞る：</label><select id="tableCategory"><option value="all">すべて</option></select></div><div class="table-wrap"><table><thead><tr><th>分野</th><th>テーマ</th><th>仕組み・流れを理解する</th></tr></thead><tbody id="tableBody"></tbody></table></div></div><div class="summary"><b>最終チェック：</b>太陽光の吸収 → 地表から赤外線放射 → 温室効果ガスが吸収・再放射。GWPは100年間のCO₂比、AGWPは放射効率と残存関数の積を100年積分。</div></section>
+<div class="foot">出典：提供された講義ノート写真・学習資料</div></main>
+<script>
+const questions=[
+{c:'補足用語',q:'資料では「温度」と「熱」をどう区別している？',o:['温度は冷たさ・温かさの尺度、熱は温度を変化させるエネルギー','温度はエネルギー、熱は冷たさの尺度','温度と熱は同じ意味','温度は分子数、熱は分子の大きさ'],a:0,e:'温度は物質の冷・温の尺度。熱は温度を変化させるエネルギーで、原子や分子の無秩序な運動エネルギーです。'},
+{c:'補足用語',q:'資料の整理で、気体の運動エネルギーの形は？',o:['並進＋回転＋振動','回転＋振動','振動のみ','並進のみ'],a:0,e:'気体は並進・回転・振動の運動エネルギーを持ちます。'},
+{c:'補足用語',q:'分子が赤外線を吸収するための絶対条件は？',o:['振動によって双極子モーメントが変化する','分子が大気中に1%以上ある','分子が二つ以上の原子からなる','分子が回転しない'],a:0,e:'資料では、赤外線吸収には分子振動によって双極子モーメントが変化する必要があるとしています。'},
+{c:'補足用語',q:'資料で、双極子モーメントの変化が「なし」とされ、赤外線を吸収しない気体は？',o:['窒素（N₂）・酸素（O₂）','二酸化炭素（CO₂）・水蒸気（H₂O）','メタン（CH₄）・水蒸気（H₂O）','CO₂・N₂'],a:0,e:'資料ではN₂（大気の約78%）とO₂（約21%）は双極子モーメントの変化なし、赤外線吸収なし。CO₂やH₂Oなどは変化ありと整理しています。'},
+{c:'太陽スペクトル',q:'ノートにある紫外線の波長範囲は？',o:['280〜400 nm','200〜280 nm','400〜700 nm','700〜2500 nm'],a:0,e:'ノートの値は紫外線280〜400 nmです。割合は5%。'},
+{c:'加熱のしくみ',q:'太陽光によって地表付近の空気が暖まる順序は？',o:['太陽光を地面・海面が吸収→地表から赤外線放射→赤外線と地表からの熱で周囲の空気が暖まる','大気が太陽光を吸収→地面が冷える→空気が暖まる','地面が赤外線を吸収→太陽へ反射→空気が暖まる','太陽光が空気を直接凍らせ→海面が暖まる'],a:0,e:'ノートの流れ：太陽光が地面・海面に吸収される→地表から赤外線が放射される→放射赤外線および地表からの熱で周囲の空気が暖められる。'},
+{c:'温室効果',q:'ノートに記されたCO₂の増加と地球の平均気温の関係は？',o:['明確な相関がある','相関はない','CO₂が増えるほど平均気温は必ず下がる','ノートでは関係に触れていない'],a:0,e:'ノートの重要事項は、CO₂の増加と地球の平均気温の上昇には明確な相関がある、ということです。'},
+{c:'温室効果ガス',q:'セメント原料の石灰石（CaCO₃）の熱分解で生じるものは？',o:['CaOとCO₂','CaOとO₂','CaCO₃とSiO₂','3CaO・SiO₂だけ'],a:0,e:'ノートの反応式：CaCO₃ → CaO + CO₂（約900℃）。'},
+{c:'GWP・AGWP',q:'ノートの整理で、CO₂の大気中に残る期間について正しいのは？',o:['15〜20%は数百年〜数千年以上残り、約80%は数十年〜数百年で海や樹木に吸収される','全量が約12年で消える','約80%は数千年以上残り、15〜20%は数年で消える','全量が約110年で消える'],a:0,e:'ノートではCO₂の15〜20%が数百年〜数千年以上大気中に残り、残り約80%は数十年〜数百年で海や樹木に吸収されると整理しています。'},{c:'太陽スペクトル',q:'地表に届く太陽光のうち、割合が最も大きい波長区分は？',o:['紫外線（5%）','可視光（43%）','近赤外線（52%）','赤外線（90%）'],a:2,e:'資料の割合は紫外線5%、可視光43%、近赤外線52%です。'},
+{c:'太陽スペクトル',q:'地表における可視光の波長範囲は？',o:['100〜280 nm','280〜400 nm','400〜700 nm','700〜2500 nm'],a:2,e:'可視光は400〜700 nm。紫外線は280〜400 nm、近赤外線は700〜2500 nmです。'},
+{c:'加熱のしくみ',q:'分子全般が光エネルギーを吸収した後、熱になる主な流れは？',o:['振動エネルギー→分子間衝突→並進運動エネルギー','電気エネルギー→核反応→光','化学エネルギー→蒸発→紫外線','磁気エネルギー→凝縮→可視光'],a:0,e:'吸収した光エネルギーは振動エネルギーになり、分子同士の衝突を通じて並進運動エネルギー（熱）へ変わります。'},
+{c:'加熱のしくみ',q:'金属が光で加熱される説明として資料にあるものは？',o:['自由電子が振動し、金属原子の振動を誘起する','水分子が蒸発して熱を作る','可視光を全て反射する','金属内部でCO₂が分解する'],a:0,e:'自由電子が振動し、金属原子の振動を誘起して赤外線を放出。空気との衝突で熱運動が増します。'},
+{c:'温室効果',q:'温室（ガラス・ビニール）が内部を保温する主な仕組みは？',o:['赤外線を通さず、対流・通風も防ぐ','太陽光を全て吸収する','温室効果ガスを化学分解する','紫外線だけを反射する'],a:0,e:'資料では、可視光・紫外線は通す一方で赤外線は通しにくく、対流・通風も防ぐと説明しています。'},
+{c:'温室効果',q:'大気の温室効果の基本的な流れは？',o:['地表が赤外線を吸収し、太陽へ返す','地表が温まり赤外線を放射し、温室効果ガスが吸収・再放出する','大気が可視光を吸収して地表へ伝える','雲が紫外線を熱に変える'],a:1,e:'太陽光で地表が温まり、地表から出る赤外線を温室効果ガスが吸収して全方向へ再放出します。'},
+{c:'温室効果',q:'資料に示された平均気温は、温室効果ガスがある場合とない場合でそれぞれ？',o:['約15℃／約−18℃','約18℃／約−15℃','約0℃／約−33℃','約33℃／約0℃'],a:0,e:'温室効果ガスがあることで平均約15℃、ない場合は約−18℃と説明されています。'},
+{c:'温室効果ガス',q:'水蒸気（H₂O）が排出規制対象の温室効果ガス分類から除外される理由は？',o:['大気中に存在しないから','湿度が短期間で変化し、人為的制御が難しいから','赤外線を吸収しないから','寿命が100年以上だから'],a:1,e:'水蒸気は気温によって湿度が短期間に大きく変化し、人為的制御が難しいためと資料は説明しています。'},
+{c:'温室効果ガス',q:'資料におけるCO₂のGWP（100年）は？',o:['1（基準）','12','27','273'],a:0,e:'CO₂を基準とするためGWPは1です。'},
+{c:'温室効果ガス',q:'メタン（CH₄）のGWP（100年）と大気中寿命の組み合わせは？',o:['27倍・約12年','273倍・約110年','1倍・数百年','数万倍・約12年'],a:0,e:'資料ではメタンはCO₂の27倍、寿命は約12年です。'},
+{c:'温室効果ガス',q:'一酸化二窒素（N₂O）のGWP（100年）と寿命の組み合わせは？',o:['27倍・約12年','273倍・約110年','1倍・約110年','273倍・約12年'],a:1,e:'資料ではN₂Oは273倍、寿命は約110年です。'},
+{c:'温室効果ガス',q:'資料で挙げられたメタンの発生源に含まれないものは？',o:['家畜のげっぷ・排せつ物','水田や有機廃棄物の埋め立て','天然ガス採掘時の漏出','セメント原料の熱分解'],a:3,e:'セメント原料の熱分解はCO₂発生源。メタンの例は家畜、水田・埋立地、天然ガス採掘時の漏出です。'},
+{c:'温室効果ガス',q:'フロン類について正しい説明は？',o:['自然界で大量に作られ、GWPは1','人工的に作られ、GWPは数百〜数万と非常に高い','主な発生源は水田だけ','大気中寿命は約12年に限られる'],a:1,e:'資料ではフロン類（代替フロン等）は人工的に作られた物質で、GWPは数百〜数万とされています。'},
+{c:'温室効果ガス',q:'N₂Oの発生源として資料に挙げられているものは？',o:['窒素肥料を使った農地からの放出','冷蔵庫の冷媒漏れだけ','水田のメタン発酵だけ','セメントの水和反応'],a:0,e:'N₂Oの発生源には、下水処理・廃棄物燃焼、化石燃料燃焼、工業プロセス、窒素肥料を使った農地があります。'},
+{c:'GWP・AGWP',q:'GWP（地球温暖化係数）の定義として正しいものは？',o:['<span class="fraction"><span class="top">ガスが100年間に吸収する熱量の合計</span><span class="bottom">CO₂が100年間に吸収する熱量の合計</span></span>','地表の平均気温そのもの','大気中に残る年数','瞬間的な放射強制力の合計'],a:0,e:'対象ガスの100年間の熱吸収量を分子、CO₂の100年間の熱吸収量を分母にした分数で表します。'},
+{c:'GWP・AGWP',q:'AGWPの式の説明に合うものは？',o:['放射効率と残留関数の積を100年間積分する','濃度を寿命で割る','CO₂排出量を気温で割る','GWPを100倍する'],a:0,e:'AGWP = ∫₀ᵀ RE・R(t) dt（T=100年）。REは放射効率、R(t)は残留関数です。'},
+{c:'GWP・AGWP',q:'資料の定義で、RE（放射効率）が表すものは？',o:['濃度が1 ppb増えたときの放射強制力の増加量','大気中に残るガスの割合','地表から放出される赤外線量','100年後の気温上昇'],a:0,e:'REは大気中濃度が1 ppb増加したときの放射強制力の増加量。赤外スペクトルの吸収しやすさなどから算出します。'},
+{c:'GWP・AGWP',q:'CO₂以外のガスで、ppb単位の濃度増加あたりの影響が大きくなりやすい理由は？',o:['元の大気中存在量が少ないため','分子量が必ず大きいため','太陽光を反射しないため','寿命が必ず長いため'],a:0,e:'資料では、元の存在量が極めて少ないため、少量増加でも濃度の増加割合が大きく、放射強制力の増加割合も大きくなるとしています。'}
+];
+const rows=[
+['温室効果','温室効果ガスとは','<b>地表から放射される赤外線を吸収し、再放出する気体分子。</b><br>赤外線のエネルギー領域は分子振動のエネルギー領域（波長域）と同じ。赤外線を吸収するには、分子が振動するときに双極子モーメントが変化する必要がある。'],
+['補足用語','温度と熱','<b>温度：</b>物質の冷たさ・温かさを表す尺度。<br><b>熱：</b>温度を変化させるエネルギー。資料では、原子や分子の無秩序な運動エネルギーとして説明。'],
+['補足用語','運動エネルギーの形','<b>気体：</b>並進＋回転＋振動。<br><b>液体：</b>回転＋振動。<br><b>固体：</b>振動。'],
+['補足用語','並進運動エネルギー','分子全体が空間を移動する運動に伴うエネルギー。多数の分子が無秩序に動き回る運動エネルギーの一部で、資料ではマクロな熱に結びつくものとして説明。'],
+['補足用語','双極子モーメント','分子内で正（＋）と負（−）の電荷がどの程度偏っているかを表すベクトル量。振動に伴ってこの偏りが変わるかが、赤外線吸収に関係する。'],
+['補足用語','赤外線を吸収する条件','<ol><li>分子が赤外線のエネルギーを受け取れる振動を持つ。</li><li>その分子振動によって双極子モーメントが変化する。</li><li>この条件を満たす振動では赤外線を吸収できる。</li></ol>追加資料では、赤外線のエネルギー領域と分子振動のエネルギー領域が対応すると説明。'],
+['補足用語','大気成分と双極子モーメントの変化','<b>N₂（約78%）・O₂（約21%）：</b>資料では振動による双極子モーメントの変化なし、赤外線吸収なし。<br><b>CO₂（約0.04%）・H₂Oなど：</b>双極子モーメントの変化あり、赤外線を吸収する温室効果ガスとして整理。']
+,
+['太陽スペクトル','地表に届く太陽光の内訳','<b>紫外線</b>：280〜400 nm（5%）<br><b>可視光</b>：400〜700 nm（43%）<br><b>近赤外線</b>：700〜2500 nm（52%）'],
+['加熱のしくみ','太陽光による気温上昇の基本フロー','<ol><li>太陽光が地面や海面に吸収される。</li><li>加熱された地表・海面から赤外線が放射される。</li><li>放射された赤外線および地表からの熱によって、周囲の空気が暖められる。</li></ol>'],
+['加熱のしくみ','分子が光を吸収して熱になる流れ','<ol><li>分子が光エネルギーを吸収する。</li><li>光エネルギーが分子の振動エネルギーに変わる。</li><li>振動する分子が周囲の分子と衝突する。</li><li>衝突によって振動エネルギーが分子全体の並進運動エネルギーへ移る。</li><li>分子の無秩序な並進運動が増え、物質の温度が上がる。</li></ol>'],
+['加熱のしくみ','金属が光で加熱される流れ','<ol><li>光の電場・磁場によって金属内の自由電子が振動する。</li><li>電子の振動が金属原子の振動を誘起する。</li><li>赤外線が放出される。</li><li>金属に接した空気の分子の並進運動が増加し、周囲の空気が暖まる。</li></ol>'],
+['加熱のしくみ','土・アスファルト・コンクリートが温まる流れ','<ol><li>土などに不純物として含まれる光吸収分子や金属酸化物が、可視光・紫外線を吸収する。</li><li>吸収した光が赤外線へ波長変換され、物質の振動エネルギーを増やす。</li><li>物質から赤外線が放射される。</li><li>接した空気の並進運動が増え、周囲の空気が暖まる。</li></ol>'],
+['温室効果','温室（ガラス・ビニール）での保温の仕組み','<ol><li>ガラス・ビニールは可視光・紫外線を通すが、赤外線は通さない（反射・遮断）。</li><li>太陽光で地面や植物が暖められる。</li><li>地面などから赤外線が発生する。</li><li>赤外線はガラス・ビニールで反射され、内部に熱が保たれる。</li></ol>'],
+['温室効果','CO₂濃度と地球の平均気温','ノートの重要事項：<b>CO₂の増加と地球の平均気温の上昇には、明確な相関がある。</b>'],['温室効果','大気の温室効果で地表付近が暖まる流れ','<ol><li>太陽光が地表・海面に吸収され、地表が暖まる。</li><li>暖まった地表から赤外線が放射される。</li><li>温室効果ガスが赤外線を吸収する。</li><li>温室効果ガスが赤外線を全方向へ再放出し、その一部が地表・大気へ戻る。</li><li>その結果、地表付近の温度が保たれる。</li></ol><b>平均気温：</b>あり約15℃／なし約−18℃。'],
+['温室効果ガス','水蒸気を規制対象の分類から除く理由','<ol><li>水蒸気量は気温に応じて湿度が短期間で大きく変わる。</li><li>人為的な排出分だけを切り分けて制御することが難しい。</li><li>このため資料では、規制対象の温室効果ガス分類から除外している。</li></ol>'],
+['温室効果ガス','二酸化炭素（CO₂）の発生源','<b>排出量が最も多く、温暖化への影響も大きい。</b><ol><li>化石燃料を燃焼する。</li><li>セメント原料の石灰石を加熱分解する：<b>CaCO₃ → CaO + CO₂</b>（約900℃）。</li><li>約1450℃でCaOとSiO₂を混ぜて、3CaO・SiO₂（ケイ酸三カルシウム）や2CaO・SiO₂（ケイ酸二カルシウム）を合成する。高温焼成に使う化石燃料の燃焼でもCO₂が発生する。</li></ol><b>GWP：</b>1（基準）。'],
+['温室効果ガス','メタン（CH₄）の発生源','<b>地球温暖化係数：</b>CO₂の27倍。<br><b>発生源：</b><ol><li>家畜のげっぷ・排せつ物。</li><li>水田。</li><li>有機廃棄物の埋め立て地。</li><li>天然ガス採掘時の漏出。</li></ol><b>大気中寿命：</b>約12年。'],
+['温室効果ガス','一酸化二窒素（N₂O）の発生源','<b>地球温暖化係数：</b>CO₂の273倍。<br><b>発生源：</b><ol><li>下水処理や廃棄物の燃焼。</li><li>化石燃料の燃焼や工業プロセス。</li><li>窒素肥料を使った農地からの放出。</li></ol><b>大気中寿命：</b>約110年。'],
+['温室効果ガス','フロン類（代替フロンなど）の発生源','<b>人工的に作られた物質。</b><br><b>地球温暖化係数：</b>非常に高い（数百〜数万）。<br><b>発生源・用途：</b><ol><li>エアコン・冷蔵庫の冷媒。</li><li>スプレーの噴射剤。</li><li>半導体の洗浄剤。</li></ol>'],
+['GWP・AGWP','大気中に残る期間（寿命）','<b>CO₂：</b>15〜20%は数百年〜数千年以上大気中に残る。残り約80%は数十年〜数百年で海や樹木に吸収される。<br><b>メタン（CH₄）：</b>約12年。<br><b>一酸化二窒素（N₂O）：</b>約110年。'],['GWP・AGWP','地球温暖化係数（GWP）の定義','<b>特定のガスが100年間に吸収する熱量が、CO₂の何倍かを表す指標。</b><br><div class="formula">GWP = <span class="fraction"><span class="top">ガスが100年間に吸収する熱量の合計</span><span class="bottom">CO₂が100年間に吸収する熱量の合計</span></span></div><b>資料の値：</b>CO₂ 1、CH₄ 27倍、N₂O 273倍。'],
+['GWP・AGWP','AGWPの式が表す評価の流れ','<div class="formula">AGWP = ∫₀ᵀ RE・R(t) dt　（T = 100年）</div><ol><li>REで、濃度増加が放射強制力をどれほど増やすかを見る。</li><li>R(t)で、放出後の各時点に大気中へどれほど残るかを見る。</li><li>2つを掛け、放出直後から100年まで積分して累積影響を評価する。</li></ol>'],
+['GWP・AGWP','RE（放射効率）とR(t)（残留関数）','<b>RE（放射効率）：</b>大気中のガス濃度が1 ppb（10億分の1）増えたときの放射強制力の増加量。赤外線スペクトルの吸収しやすさなどから算出する。<br><b>R(t)（残留関数）：</b>放出されたガスのうち、時刻tに大気中に残っている割合。'],
+['GWP・AGWP','CO₂以外のガスでGWPが大きくなりやすい理由','<ol><li>CO₂以外のガスは、大気中に元からある量が非常に少ない場合がある。</li><li>同じppb単位で増えたとき、元の量に対する増加割合が大きい。</li><li>資料では、濃度増加時の放射強制力の増加割合が大きくなりうることを理由として説明。</li></ol>']];const cats=[...new Set(questions.map(x=>x.c))];for(const id of ['category','tableCategory']){const sel=document.getElementById(id);cats.forEach(c=>{const op=document.createElement('option');op.value=c;op.textContent=c;sel.append(op)})}
+let deck=[],idx=0,score=0,answered=false,correct=0,currentMode="sequence";const wrongSet=new Set();const qArea=document.getElementById('quizArea');
+function start(mode=currentMode){currentMode=mode;document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));const c=document.getElementById('category').value;let source=questions.filter(x=>c==='all'||x.c===c);if(mode==='retry')source=source.filter(x=>wrongSet.has(x));deck=source.map(x=>({...x,source:x,opts:x.o.map((t,i)=>({t,ok:i===x.a})).sort(()=>Math.random()-.5)}));if(mode==='random')deck.sort(()=>Math.random()-.5);idx=0;score=0;correct=0;if(!deck.length){document.getElementById('stats').textContent=mode==='retry'?'間違えた問題はありません':'0問';document.getElementById('bar').style.width='0%';qArea.innerHTML=mode==='retry'?'<div class="summary">間違えた問題はまだありません。まずはクイズに挑戦してください。</div>':'<div class="summary">この範囲に問題はありません。</div>';return}render()}
+function render(){answered=false;document.getElementById('stats').textContent=`正解 ${correct} / ${score}　·　${Math.min(idx+1,deck.length)} / ${deck.length}問`;document.getElementById('bar').style.width=`${deck.length?idx/deck.length*100:0}%`;if(idx>=deck.length){document.getElementById('bar').style.width='100%';qArea.innerHTML=`<div class="summary"><h2>おつかれさま！</h2><p>${deck.length}問中 <b>${correct}問正解</b>（${Math.round(correct/deck.length*100)||0}%）</p><p>間違えた問題：${wrongSet.size}問</p><button class="btn primary" id="again">もう一度挑戦</button> <button class="btn" id="retryWrong">間違えなおす</button></div>`;document.getElementById('again').onclick=()=>start(currentMode==='retry'?'sequence':currentMode);document.getElementById('retryWrong').onclick=()=>start('retry');return}const q=deck[idx];qArea.innerHTML=`<div class="qmeta">${q.c} · 問題 ${idx+1}</div><div class="question">${q.q}</div><div class="choices">${q.opts.map((x,i)=>`<button class="choice" data-i="${i}">${'ABCD'[i]}. ${x.t}</button>`).join('')}</div><div id="feedback"></div><div class="controls"><button class="btn" id="restart">最初から</button><button class="btn primary hide" id="next">次の問題 →</button></div>`;qArea.querySelectorAll('.choice').forEach(b=>b.onclick=()=>choose(+b.dataset.i));document.getElementById('restart').onclick=()=>start(currentMode);document.getElementById('next').onclick=()=>{idx++;render()}}function choose(i){if(answered)return;answered=true;score++;const q=deck[idx],good=q.opts[i].ok;if(good){correct++;wrongSet.delete(q.source)}else{wrongSet.add(q.source)}qArea.querySelectorAll('.choice').forEach((b,j)=>{b.disabled=true;if(q.opts[j].ok)b.classList.add('correct');else if(j===i)b.classList.add('wrong')});const f=document.getElementById('feedback');f.className='feedback '+(good?'good':'bad');f.innerHTML=`<b>${good?'正解！':'不正解'}</b>　${q.e}`;document.getElementById('next').classList.remove('hide');document.getElementById('stats').textContent=`正解 ${correct} / ${score}　·　${idx+1} / ${deck.length}問`}
+document.getElementById('category').onchange=()=>start(currentMode);document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>start(b.dataset.mode));document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active')});
+document.getElementById('tableCategory').onchange=()=>{const c=document.getElementById('tableCategory').value;document.getElementById('tableBody').innerHTML=rows.filter(r=>c==='all'||r[0]===c).map(r=>`<tr><td><span class="tag">${r[0]}</span></td><td><b>${r[1]}</b></td><td>${r[2]}</td></tr>`).join('')};document.getElementById('tableCategory').onchange();start();
+</script></body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
