@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>URLハブサイト</title>
+</head>
+<body>
+  <!-- 自作デザインのフォームに置き換え可能 -->
+  <form id="url-form">
+    <input type="text" id="title" placeholder="サイト名" required>
+    <input type="url" id="url" placeholder="https://example.com" required>
+    <button type="submit" id="submit-btn">登録する</button>
+  </form>
+
+  <!-- ここに一覧が自動挿入される -->
+  <ul id="url-list"><li>読み込み中...</li></ul>
+
+  <script>
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxM0POO10yCnVjtDoAa6SZJmVnphm4ny53TOiEKrzF-3OCeS6vQjMsGdEX5sIZUd29Z/exec';
+
+    // 1. スプレッドシートから一覧を取得して表示
+    async function loadUrls() {
+      const listEl = document.getElementById('url-list');
+      try {
+        const res = await fetch(GAS_API_URL);
+        const data = await res.json();
+        listEl.innerHTML = '';
+
+        data.reverse().forEach(item => {
+          if (!/^https?:\/\//.test(item.url)) return; // 安全対策
+
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = item.url;
+          a.textContent = item.title;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          li.appendChild(a);
+          listEl.appendChild(li);
+        });
+      } catch (err) {
+        listEl.innerHTML = '<li>読み込みに失敗しました</li>';
+      }
+    }
+
+    // 2. フォーム送信時にスプレッドシートへ登録
+    document.getElementById('url-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = '送信中...';
+
+      const payload = {
+        title: document.getElementById('title').value,
+        url: document.getElementById('url').value
+      };
+
+      try {
+        // GAS特有のCORS制限を回避するためヘッダーは付けずに文字列で送信
+        await fetch(GAS_API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        e.target.reset();
+        await loadUrls(); // 登録後に一覧を最新化
+      } catch (err) {
+        alert('登録に失敗しました');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '登録する';
+      }
+    });
+
+    loadUrls();
+  </script>
+</body>
+</html>
