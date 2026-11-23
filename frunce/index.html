@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1022">
+  <title>フrunス — フランス語数字マスター</title>
+  <link rel="stylesheet" href="styles.css?v=collision-ui-3">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="app">
+    <canvas id="world" aria-label="3Dランナーゲーム画面"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <div id="flash" class="screen-flash" aria-hidden="true"></div>
+
+    <section id="homeScreen" class="screen home-screen">
+      <div class="home-shell">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true"><span>1</span><i>2</i><b>3</b></div>
+          <div>
+            <p class="eyebrow">FRENCH NUMBER RUNNER</p>
+            <h1>フrunス</h1>
+          </div>
+        </div>
+        <p class="home-lead">走って、選んで、フランス語の数字をマスターしよう。</p>
+
+        <div class="mode-grid" role="group" aria-label="学習モード">
+          <button class="mode-card selected" data-mode="game" type="button">
+            <span class="mode-icon runner-icon" aria-hidden="true">↗</span>
+            <span><strong>ランナーモード</strong><small>ゲートを選び、数字クイズで魔法使いの軍勢に挑戦</small></span>
+            <span class="radio-dot" aria-hidden="true"></span>
+          </button>
+          <button class="mode-card" data-mode="study" type="button">
+            <span class="mode-icon book-icon" aria-hidden="true">Aa</span>
+            <span><strong>一問一答</strong><small>落ち着いて解いて、綴りと文法のポイントを確認</small></span>
+            <span class="radio-dot" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="settings-panel">
+          <div class="section-heading"><span>STAGE</span><small>学習する数字の範囲</small></div>
+          <div class="stage-grid" role="group" aria-label="難易度">
+            <button class="stage-card selected" data-stage="1" type="button"><span>01</span><strong>初級</strong><small>1 – 100</small></button>
+            <button class="stage-card" data-stage="2" type="button"><span>02</span><strong>中級</strong><small>1 – 1,000</small></button>
+            <button class="stage-card" data-stage="3" type="button"><span>03</span><strong>上級</strong><small>1 – 9,999</small></button>
+          </div>
+
+          <div class="settings-row">
+            <div class="setting-block">
+              <div class="section-heading"><span>ANSWER</span><small>回答方式</small></div>
+              <div class="segmented" role="group" aria-label="回答方式">
+                <button class="selected" data-answer="choice" type="button">4択</button>
+                <button data-answer="input" type="button">キーボード入力</button>
+              </div>
+            </div>
+            <div class="setting-block count-setting">
+              <div class="section-heading"><span>QUESTIONS</span><small>問題数</small></div>
+              <div class="segmented count-segment" role="group" aria-label="問題数">
+                <button data-count="5" type="button">5</button>
+                <button data-count="10" type="button">10</button>
+                <button class="selected" data-count="15" type="button">15</button>
+                <button data-count="20" type="button">20</button>
+                <button data-count="25" type="button">25</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-actions">
+          <button id="startButton" class="primary-button" type="button" disabled>
+            <span>準備中…</span><b aria-hidden="true">→</b>
+          </button>
+          <button id="reviewButton" class="text-button" type="button" hidden>間違えた問題を復習 <span id="reviewCount"></span></button>
+          <p id="assetStatus" class="asset-status" role="status">3Dモデルを読み込んでいます…</p>
+        </div>
+        <p class="home-footnote">左右スワイプ／ドラッグ、または ← → キーで操作</p>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen" hidden>
+      <header class="game-topbar">
+        <button id="leaveGame" class="icon-button" type="button" aria-label="ホームへ戻る">×</button>
+        <div class="game-title"><span class="eyebrow">NOMBRE RUN</span><strong id="waveLabel">WAVE 01 / 15</strong></div>
+        <div class="top-stats"><span>正解</span><b id="gameCorrect">0</b><span class="stat-divider">/</span><b id="gameAnswered">0</b></div>
+        <button id="gamePause" class="icon-button pause-button" type="button" aria-label="一時停止">Ⅱ</button>
+        <button id="muteButton" class="icon-button sound-button" type="button" aria-label="効果音をミュート">♫</button>
+      </header>
+
+      <div class="game-question-strip">
+        <span class="question-kicker">フランス語で何と言う？</span>
+        <strong id="gameNumber">—</strong>
+        <span class="army-pill"><i class="ally-dot"></i><b id="armyCount">12</b><small>人</small></span>
+      </div>
+
+      <div id="worldLabels" class="world-labels" aria-hidden="true">
+        <div id="armyBadge" class="world-badge ally-badge"><span>味方</span><b>12</b></div>
+        <div id="enemyBadge" class="world-badge enemy-badge"><span id="enemyLabel">敵軍</span><b id="enemyBadgeCount">8</b></div>
+      </div>
+
+      <div id="gateHint" class="gate-hint"><span class="hint-arrows">← <i>→</i></span><span>左右に動いてゲートを選ぼう</span></div>
+      <div id="battleBanner" class="battle-banner" hidden></div>
+
+      <div id="gameAnswerPanel" class="answer-panel game-answer-panel" hidden>
+        <div class="question-panel-heading"><span class="eyebrow">QUESTION <b id="questionWave">01</b></span><span id="quizStageTag" class="tiny-tag">ÉCRIS EN FRANÇAIS</span></div>
+        <h2><span id="quizNumber">84</span><small>フランス語のスペルを答えてください</small></h2>
+        <div id="gameChoiceGrid" class="choice-grid"></div>
+        <form id="gameInputForm" class="answer-input-form" hidden>
+          <input id="gameAnswerInput" type="text" placeholder="ex. quatre-vingt-quatre" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+          <button class="primary-button compact-button" type="submit" aria-label="回答"><b aria-hidden="true">→</b></button>
+        </form>
+        <div id="gameFeedback" class="feedback-box" hidden></div>
+        <button id="battleContinue" class="primary-button battle-continue" type="button" aria-label="戦闘へ進む" hidden><b aria-hidden="true">→</b></button>
+      </div>
+
+      <div id="touchControls" class="touch-controls">
+        <button data-lane="left" type="button" aria-label="左のゲートを選ぶ">←</button>
+        <button data-lane="right" type="button" aria-label="右のゲートを選ぶ">→</button>
+      </div>
+    </section>
+
+    <section id="studyScreen" class="screen study-screen" hidden>
+      <header class="study-topbar">
+        <button id="leaveStudy" class="icon-button" type="button" aria-label="ホームへ戻る">×</button>
+        <div><span class="eyebrow">ÉTUDE</span><strong id="studyTitle">一問一答</strong></div>
+        <button id="studyPause" class="icon-button pause-button" type="button" aria-label="一時停止">Ⅱ</button>
+        <button id="studyMute" class="icon-button sound-button" type="button" aria-label="効果音をミュート">♫</button>
+      </header>
+      <div class="study-shell">
+        <div class="study-stats">
+          <div><span>正答数</span><b id="studyCorrect">0</b></div>
+          <div><span>連続正解</span><b id="studyStreak">0</b></div>
+          <div><span>正答率</span><b id="studyAccuracy">—%</b></div>
+        </div>
+        <div class="study-progress"><span id="studyProgressBar"></span></div>
+        <article class="study-card">
+          <div class="question-panel-heading"><span class="eyebrow">QUESTION <b id="studyQuestionIndex">01 / 15</b></span><span id="studyStageTag" class="tiny-tag">STAGE 1</span></div>
+          <p class="study-prompt">次の数字をフランス語で書いてください</p>
+          <h1 id="studyNumber">84</h1>
+          <div id="studyChoiceGrid" class="choice-grid"></div>
+          <form id="studyInputForm" class="answer-input-form" hidden>
+            <input id="studyAnswerInput" type="text" placeholder="フランス語のスペルを入力" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+            <button class="primary-button compact-button" type="submit">回答 <b>→</b></button>
+          </form>
+          <div id="studyFeedback" class="feedback-box" hidden></div>
+          <button id="studyNext" class="primary-button study-next" type="button" hidden>次の問題 <b>→</b></button>
+        </article>
+        <p class="study-tip">ハイフンと半角スペースはどちらでもOK。アクセント記号の有無も判定に影響しません。</p>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen result-screen" hidden>
+      <div class="result-card">
+        <div id="resultIcon" class="result-icon">✦</div>
+        <p class="eyebrow" id="resultEyebrow">SESSION COMPLETE</p>
+        <h1 id="resultTitle">BRAVO !</h1>
+        <p id="resultSubtitle" class="result-subtitle"></p>
+        <div class="result-stats">
+          <div><span>正解</span><b id="resultCorrect">0 / 0</b></div>
+          <div><span>正答率</span><b id="resultAccuracy">0%</b></div>
+          <div id="survivorStat"><span>残った仲間</span><b id="resultArmy">0人</b></div>
+        </div>
+        <div id="resultFeedback" class="result-feedback" hidden></div>
+        <div id="reviveActions" class="revive-actions" hidden>
+          <button id="watchAdButton" class="secondary-button" type="button">広告を見て復活 <b>▶</b></button>
+          <p>広告はゲーム画面上に表示されます。20秒後に閉じて復活できます。</p>
+          <button id="reviveButton" class="primary-button" type="button" hidden>仲間と復活する <b>↻</b></button>
+        </div>
+        <div class="result-actions">
+          <button id="resultReview" class="secondary-button" type="button" hidden>間違えた問題を復習</button>
+          <button id="resultHome" class="primary-button" type="button">ホームへ戻る <b>→</b></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="pauseScreen" class="pause-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="pauseTitle">
+      <div class="pause-card">
+        <div class="pause-heading">
+          <span class="pause-mark">Ⅱ</span>
+          <div><p class="eyebrow">PAUSED</p><h2 id="pauseTitle">一時停止</h2></div>
+        </div>
+        <p id="pauseSessionInfo" class="pause-session-info"></p>
+        <div class="now-playing">
+          <span class="music-note">♫</span>
+          <div><small>NOW PLAYING</small><strong id="currentTrack">BGMを確認中…</strong></div>
+          <span class="playing-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        </div>
+        <div class="pause-setting">
+          <div class="pause-setting-heading"><span>BGM 音量</span><b id="volumeLabel">38%</b></div>
+          <input id="bgmVolume" type="range" min="0" max="100" value="38" aria-label="BGM音量">
+        </div>
+        <div class="pause-setting">
+          <div class="pause-setting-heading"><span>回答方式</span><small>変更は次の未回答問題から反映</small></div>
+          <div class="segmented pause-answer-setting" role="group" aria-label="回答方式">
+            <button data-pause-answer="choice" type="button">4択</button>
+            <button data-pause-answer="input" type="button">キーボード入力</button>
+          </div>
+        </div>
+        <button id="pauseSfx" class="pause-toggle" type="button"><span>効果音</span><b>ON</b></button>
+        <div class="pause-actions">
+          <button id="resumeButton" class="primary-button" type="button">ゲームに戻る <b>▶</b></button>
+          <button id="pauseHome" class="text-button" type="button">ホームへ戻る</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="adOverlay" class="ad-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="adTitle">
+      <div class="ad-card">
+        <header class="ad-header">
+          <div><p class="eyebrow">REVIVE AD</p><h2 id="adTitle">広告を見て復活</h2></div>
+          <span id="adCountdown" class="ad-countdown">20秒</span>
+        </header>
+        <div class="ad-video-frame">
+          <video id="adVideo" playsinline controls preload="metadata"></video>
+          <button id="adClose" class="ad-close" type="button" aria-label="広告を閉じる" hidden>×</button>
+        </div>
+        <p id="adMessage" class="ad-message">動画を再生中です。20秒後に閉じるボタンが表示されます。</p>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <script type="module">
+    try { await import('./app.js?v=collision-ui-3'); }
+    catch (error) {
+      console.error(error);
+      const status = document.getElementById('assetStatus');
+      if (status) status.textContent = '読み込みに失敗しました。インターネット接続とGLBモデルの配置を確認してください。';
+      const start = document.getElementById('startButton');
+      if (start) { start.disabled = true; start.querySelector('span').textContent = '読み込みエラー'; }
+    }
+  </script>
+</body>
+</html>
